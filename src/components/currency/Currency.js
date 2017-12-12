@@ -59,4 +59,14 @@ export class CurrencyComponent extends NumberComponent {
       })
     });
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Currency',
+      icon: 'fa fa-usd',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#currency',
+      weight: 60
+    };
+  }
 }

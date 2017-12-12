@@ -201,6 +201,9 @@ export class BaseComponent {
        */
       this.info = this.elementInfo();
     }
+
+    // Allow anyone to hook into the component creation.
+    this.hook('component');
   }
 
   /**
@@ -406,6 +409,7 @@ export class BaseComponent {
       this.element.component = this.component;
     }
 
+    this.hook('element', this.element);
     return this.element;
   }
 

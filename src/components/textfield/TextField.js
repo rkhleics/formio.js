@@ -13,4 +13,14 @@ export class TextFieldComponent extends BaseComponent {
     info.changeEvent = 'input';
     return info;
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Text Field',
+      icon: 'fa fa-terminal',
+      group: 'basic',
+      documentation: 'http://help.form.io/userguide/#textfield',
+      weight: 0
+    };
+  }
 }

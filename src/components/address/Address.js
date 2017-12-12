@@ -450,4 +450,13 @@ export class AddressComponent extends TextFieldComponent {
     info.attr.class += ' address-search';
     return info;
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Address',
+      icon: 'fa fa-home',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#address'
+    };
+  }
 }

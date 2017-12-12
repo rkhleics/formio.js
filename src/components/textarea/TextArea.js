@@ -112,4 +112,14 @@ export class TextAreaComponent extends TextFieldComponent {
     }
     return info;
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Text Area',
+      group: 'basic',
+      icon: 'fa fa-font',
+      documentation: 'http://help.form.io/userguide/#textarea',
+      weight: 40
+    };
+  }
 }

@@ -118,6 +118,10 @@ export class FormioComponents extends BaseComponent {
     return comp;
   }
 
+  getContainer() {
+    return this.element;
+  }
+
   /**
    * Add a new component to the components array.
    *
@@ -127,11 +131,12 @@ export class FormioComponents extends BaseComponent {
    * @return {BaseComponent} - The created component instance.
    */
   addComponent(component, element, data) {
-    element = element || this.element;
+    element = element || this.getContainer();
     data = data || this.data;
     component.row = this.row;
-    const comp = this.createComponent(component, this.options, data);
+    let comp = this.createComponent(component, this.options, data);
     this.setHidden(comp);
+    element = this.hook('addComponent', element, comp);
     element.appendChild(comp.getElement());
     return comp;
   }
@@ -201,7 +206,7 @@ export class FormioComponents extends BaseComponent {
    * @param data
    */
   addComponents(element, data) {
-    element = element || this.element;
+    element = element || this.getContainer();
     data = data || this.data;
     _each(this.component.components, (component) => this.addComponent(component, element, data));
   }
@@ -412,3 +417,13 @@ export class FormioComponents extends BaseComponent {
 }
 
 FormioComponents.customComponents = {};
+FormioComponents.groupInfo = {
+  basic: {
+    title: 'Basic Components',
+    weight: 0
+  },
+  advanced: {
+    title: 'Advanced',
+    weight: 10
+  }
+};

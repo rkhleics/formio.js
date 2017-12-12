@@ -1,9 +1,15 @@
 import { FormioComponents } from '../Components';
 export class PanelComponent extends FormioComponents {
+  getContainer() {
+    return this.panelBody;
+  }
+
+  get className() {
+    return 'panel panel-' + this.component.theme + ' ' + super.className;
+  }
+
   build() {
-    this.element = this.ce('div', {
-      class: 'panel panel-' + this.component.theme + ' ' + this.component.customClass
-    });
+    this.createElement();
     if (this.component.title) {
       let heading = this.ce('div', {
         class: 'panel-heading'
@@ -16,10 +22,10 @@ export class PanelComponent extends FormioComponents {
       heading.appendChild(title);
       this.element.appendChild(heading);
     }
-    let body = this.ce('div', {
+    this.panelBody = this.ce('div', {
       class: 'panel-body'
     });
-    this.addComponents(body);
-    this.element.appendChild(body);
+    this.addComponents();
+    this.element.appendChild(this.panelBody);
   }
 }

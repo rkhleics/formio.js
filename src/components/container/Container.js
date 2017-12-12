@@ -8,13 +8,11 @@ export class ContainerComponent extends FormioComponents {
   }
 
   build() {
-    this.element = this.ce('div', {
-      class: 'formio-container-component ' + this.component.customClass
-    });
+    this.createElement();
     if (!this.data[this.component.key]) {
       this.data[this.component.key] = {};
     }
-    this.addComponents(this.element, this.data[this.component.key]);
+    this.addComponents(this.getContainer(), this.data[this.component.key]);
   }
 
   getValue() {

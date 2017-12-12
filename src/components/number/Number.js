@@ -104,4 +104,14 @@ export class NumberComponent extends BaseComponent {
   setValueAt(index, value) {
     this.inputs[index].value = this.formatNumber(value);
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Number',
+      icon: 'fa fa-hashtag',
+      group: 'basic',
+      documentation: 'http://help.form.io/userguide/#number',
+      weight: 10
+    };
+  }
 }

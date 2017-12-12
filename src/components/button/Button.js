@@ -11,28 +11,34 @@ export class ButtonComponent extends BaseComponent {
     if (this.component.block) {
       info.attr.class += ' btn-block';
     }
-    if (this.component.customClass) {
-      info.attr.class += ' ' + this.component.customClass;
-    }
     return info;
   }
 
   set loading(loading) {
-    this.setLoading(this.element, loading);
+    this.setLoading(this.buttonElement, loading);
   }
 
   set disabled(disabled) {
     super.disabled = disabled;
-    this.setDisabled(this.element, disabled);
+    this.setDisabled(this.buttonElement, disabled);
+  }
+
+  // No label needed for buttons.
+  createLabel() {}
+
+  createInput(container) {
+    this.buttonElement = super.createInput(container);
   }
 
   build() {
-    this.element = this.ce(this.info.type, this.info.attr);
-    this.addShortcut(this.element);
+    super.build();
+
+    // Add the shortcuts to the button element.
+    this.addShortcut(this.buttonElement);
     if (this.component.label) {
       this.labelElement = this.text(this.addShortcutToLabel());
-      this.element.appendChild(this.labelElement);
-      this.createTooltip(this.element, null, 'glyphicon glyphicon-question-sign');
+      this.buttonElement.appendChild(this.labelElement);
+      this.createTooltip(this.buttonElement, null, 'glyphicon glyphicon-question-sign');
     }
     if (this.component.action === 'submit') {
       this.on('submitButton', () => {
@@ -51,7 +57,7 @@ export class ButtonComponent extends BaseComponent {
         this.loading = false;
       }, true);
     }
-    this.addEventListener(this.element, 'click', (event) => {
+    this.addEventListener(this.buttonElement, 'click', (event) => {
       switch (this.component.action) {
         case 'submit':
           event.preventDefault();
@@ -106,6 +112,6 @@ export class ButtonComponent extends BaseComponent {
 
   destroy() {
     super.destroy.apply(this, Array.prototype.slice.apply(arguments));
-    this.removeShortcut(this.element);
+    this.removeShortcut(this.buttonElement);
   }
 }

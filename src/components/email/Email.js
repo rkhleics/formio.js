@@ -9,4 +9,13 @@ export class EmailComponent extends TextFieldComponent {
     info.attr.type = 'email';
     return info;
   }
+
+  static get builderInfo() {
+    return {
+      title: 'Email',
+      icon: 'fa fa-at',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#email'
+    };
+  }
 }

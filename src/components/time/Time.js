@@ -20,4 +20,8 @@ export class TimeComponent extends TextFieldComponent {
   setValueAt(index, value) {
     this.inputs[index].value = moment(value, 'HH:mm:ss').format(this.component.format);
   }
+
+  static get builderInfo() {
+    return false;
+  }
 }

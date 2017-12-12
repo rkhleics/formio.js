@@ -133,7 +133,7 @@ export class FormComponent extends FormioForm {
     let submissionData = this.data[this.component.key] ? this.data[this.component.key].data : {};
 
     // Add components using the data of the submission.
-    this.addComponents(this.element, submissionData);
+    this.addComponents(this.getContainer(), submissionData);
 
     // Restore default values.
     this.restoreValue();
