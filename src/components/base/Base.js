@@ -214,6 +214,8 @@ export class BaseComponent {
    */
   t(text, params) {
     params = params || {};
+    params.data = this.root ? this.root.data : this.data;
+    params.row = this.data;
     params.component = this.component;
     params.nsSeparator = '::';
     params.keySeparator = '.|.';
@@ -513,6 +515,7 @@ export class BaseComponent {
   addValue() {
     this.addNewValue();
     this.buildRows();
+	  this.checkConditions(this.root ? this.root.data : this.data);
     this.restoreValue();
   }
 
@@ -936,6 +939,10 @@ export class BaseComponent {
         case 'A':
           maskArray.numeric = false;
           maskArray.push(/[a-zA-Z]/);
+          break;
+        case 'a':
+          maskArray.numeric = false;
+          maskArray.push(/[a-z]/);
           break;
         case '*':
           maskArray.numeric = false;
@@ -1510,6 +1517,11 @@ export class BaseComponent {
   }
 
   checkValidity(data, dirty) {
+    // Force valid if component is conditionally hidden.
+    if (!FormioUtils.checkCondition(this.component, data, this.data)) {
+      return true;
+    }
+
     let message = this.invalid || this.invalidMessage(data, dirty);
     this.setCustomValidity(message, dirty);
     return message ? false : true;

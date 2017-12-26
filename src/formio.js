@@ -387,6 +387,7 @@ export class Formio {
       return Promise.reject('You must be authenticated to generate a temporary auth token.');
     }
     return this.makeRequest('tempToken', this.projectUrl + '/token', 'GET', null, {
+      ignoreCache: true,
       header: new Headers({
         'x-expire': expire,
         'x-allow': allowed
@@ -419,7 +420,7 @@ export class Formio {
     apiUrl += '/submission/' + this.submissionId;
     apiUrl += '/download';
 
-    let download = Formio.baseUrl + apiUrl;
+    let download = this.base + apiUrl;
     return new Promise((resolve, reject) => {
       this.getTempToken(3600, 'GET:' + apiUrl).then((tempToken) => {
         download += '?token=' + tempToken.key;

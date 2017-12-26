@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.25.7
+### Fixed
+ - Problem with the Select dropdown from re-rendering after it has been destroyed.
+ - Issue with the default select for html5 widgets.
+
+### Changed
+ - Upgrade moment to 2.20.1
+
+## 2.25.6
+### Added
+ - Ability to dynamically alter text based on input data.
+ - Try/catch around the jsLogic for checkconditionals.
+ - LazyLoading for select dropdowns.
+ 
+### Fixed
+ - Caching issue with getTempToken method.
+ - Problem with the "in" operator for JSONLogic crashing with null inputs.
+
+## 2.25.5
+### Fixed
+ - getDownloadUrl to work with remote environments.
+
+## 2.25.4
+### Fixed
+ - Problems where conditionally hidden panels/wells were not making their children not required.
+ - Issues with setting default values on datagrids.
+
+### Added
+ - Ability to provide an input mask where it will force lowercase alphabetical.
+
 ## 2.25.3
 ### Fixed
  - An issue where data values within a datagrid get messed up when rows are removed.
