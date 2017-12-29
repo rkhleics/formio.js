@@ -33,6 +33,7 @@ import { SurveyComponent } from './survey/Survey';
 import { WellComponent } from './well/Well';
 import { GmapComponent } from './gmap/Gmap';
 import { FileComponent } from './file/File';
+import { TabsComponent } from "./tabs/Tabs";
 module.exports = {
   address: AddressComponent,
   base: BaseComponent,
@@ -59,6 +60,7 @@ module.exports = {
   number: NumberComponent,
   password: PasswordComponent,
   panel: PanelComponent,
+  tabs: TabsComponent,
   column: ColumnComponent,
   columns: ColumnsComponent,
   table: TableComponent,

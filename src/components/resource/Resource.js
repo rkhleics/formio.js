@@ -25,52 +25,15 @@ export class ResourceComponent extends SelectComponent {
 
     this.addEventListener(addButton, 'click', (event) => {
       event.preventDefault();
-
-      // HTML for dialog
-      var template = '<div class="row">' +
-                       '<div class="col-sm-12">' +
-                         '<b id="close" class="formio-dialog-close pull-right">X</b>' +
-                       '</div>' +
-                     '</div>' +
-                     '<div class="row">' +
-                       '<div class="col-sm-12">' +
-                         '<div class="panel panel-default">' +
-                           '<div class="panel-heading">' +
-                             '<h3 class="panel-title">' + (this.component.addResourceLabel || 'Add Resource') + '</h3>' +
-                           '</div>' +
-                           '<div class="panel-body">' +
-                             '<div id="formio"></div>' +
-                           '</div>' +
-                         '</div>' +
-                       '</div>' +
-                     '</div>';
-
-      this.dialog = this.ce('dialog', {
-        class: 'formio-dialog'
-      });
-      this.dialog.innerHTML = template;
-      addButton.ownerDocument.body.appendChild(this.dialog);
-      dialogPolyfill.registerDialog(this.dialog);
-
-      var self  = this;
-      var close = this.dialog.querySelector('#close');
-      var form  = new FormioForm(this.dialog.querySelector('#formio'));
-
-      close.onclick = function () {
-        self.dialog.close();
-		  };
-
+      let dialog = this.createModal(this.component.addResourceLabel || 'Add Resource');
+      let formioForm = this.ce('div');
+      dialog.body.appendChild(formioForm);
+      var form = new FormioForm(formioForm);
 		  form.on('submit', (submission) => {
-        self.setValue(submission);
-        self.dialog.close();
+        this.setValue(submission);
+        dialog.close();
 		  });
-      form.src = Formio.getBaseUrl() + '/form/' + self.component.resource;
-
-      this.dialog.onclose = function () {
-        self.dialog.parentElement.removeChild(self.dialog);
-      };
-
-      this.dialog.showModal();
+      form.src = Formio.getBaseUrl() + '/form/' + this.component.resource;
     });
 
     return addButton;

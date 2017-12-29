@@ -7,8 +7,11 @@ import { FormioComponents } from './components/Components';
 import _groupBy from 'lodash/groupBy';
 import _sortBy from 'lodash/sortBy';
 import _each from 'lodash/each';
+import _merge from 'lodash/merge';
 import _assign from 'lodash/assign';
 import _map from 'lodash/map';
+
+Components.textfield.editForm = require('./components/textfield/TextField.form');
 
 export class FormioFormBuilder extends FormioForm {
   constructor(element, options) {
@@ -20,17 +23,20 @@ export class FormioFormBuilder extends FormioForm {
         // Make sure the component position is relative so the buttons align properly.
         comp.getElement().style.position = 'relative';
 
+        let removeButton = this.ce('div', {
+          class: 'btn btn-xxs btn-danger component-settings-button component-settings-button-remove'
+        }, this.ce('span', {class: 'glyphicon glyphicon-remove'}));
+        this.addEventListener(removeButton, 'click', () => self.deleteComponent(comp));
+
+        let editButton = this.ce('div', {
+          class: 'btn btn-xxs btn-default component-settings-button component-settings-button-edit'
+        }, this.ce('span', {class: 'glyphicon glyphicon-cog'}));
+        this.addEventListener(editButton, 'click', () => self.editComponent(comp));
+
         // Add the edit buttons to the component.
         comp.prepend(this.ce('div', {
           class: 'component-btn-group'
-        }, [
-          this.ce('div', {
-            class: 'btn btn-xxs btn-danger component-settings-button component-settings-button-remove'
-          }, this.ce('span', {class: 'glyphicon glyphicon-remove'})),
-          this.ce('div', {
-            class: 'btn btn-xxs btn-default component-settings-button component-settings-button-edit'
-          }, this.ce('span', {class: 'glyphicon glyphicon-cog'}))
-        ]));
+        }, [removeButton, editButton]));
       }
 
       if (this instanceof ColumnsComponent) {
@@ -47,6 +53,146 @@ export class FormioFormBuilder extends FormioForm {
       }
       return this.dragContainer;
     };
+  }
+
+  deleteComponent(component) {
+    if (!component.parent) {
+      return;
+    }
+    let remove = true;
+    if (component.type === 'components' && component.getComponents().length > 0) {
+      remove = window.confirm(this.t('Removing this component will also remove all of its children. Are you sure you want to do this?'));
+    }
+    if (remove) {
+      component.parent.removeComponentById(component.id);
+    }
+  }
+
+  editComponent(component) {
+    let componentClass = Components[component.component.type];
+    let dialog = this.createModal(component.name);
+    let formioForm = this.ce('div');
+    let preview = this.ce('div', {
+      class: 'component-preview'
+    });
+    let componentInfo = componentClass ? componentClass.builderInfo : {};
+
+    let saveButton = this.ce('button', {
+      class: 'btn btn-success',
+      style: 'margin-right: 10px;'
+    }, this.t('Save'));
+
+    let cancelButton = this.ce('button', {
+      class: 'btn btn-default',
+      style: 'margin-right: 10px;'
+    }, this.t('Cancel'));
+
+    let removeButton = this.ce('button', {
+      class: 'btn btn-danger'
+    }, this.t('Remove'));
+
+    let componentEdit = this.ce('div', {
+
+    }, [
+      this.ce('div', {
+        class: 'row'
+      }, [
+        this.ce('div', {
+          class: 'col col-sm-6'
+        }, this.ce('p', {
+          class: 'lead'
+        }, componentInfo.title + ' Component')),
+        this.ce('div', {
+          class: 'col col-sm-6'
+        }, [
+          this.ce('div', {
+            class: 'pull-right',
+            style: 'margin-right: 20px; margin-top: 10px'
+          }, this.ce('a', {
+            href: componentInfo.documentation || '#',
+            target: '_blank'
+          }, this.ce('i', {
+            class: 'glyphicon glyphicon-new-window'
+          }, ' ' + this.t('Help'))))
+        ])
+      ]),
+      this.ce('div', {
+        class: 'row'
+      }, [
+        this.ce('div', {
+          class: 'col col-sm-6'
+        }, formioForm),
+        this.ce('div', {
+          class: 'col col-sm-6'
+        }, [
+          this.ce('div', {
+            class: 'panel panel-default preview-panel'
+          }, [
+            this.ce('div', {
+              class: 'panel-heading'
+            }, this.ce('h3', {
+              class: 'panel-title'
+            }, this.t('Preview'))),
+            this.ce('div', {
+              class: 'panel-body'
+            }, preview)
+          ]),
+          this.ce('div', {
+            style: 'margin-top: 10px;'
+          }, [
+            saveButton,
+            cancelButton,
+            removeButton
+          ])
+        ])
+      ])
+    ]);
+
+    let updatePreview = function(comp) {
+      preview.innerHTML = '';
+      preview.appendChild(Components.create(comp).getElement())
+    };
+
+    // Update the preview with this component.
+    updatePreview(component.component);
+
+    // Append the settings page to the dialog body.
+    dialog.body.appendChild(componentEdit);
+    let editForm = new FormioForm(formioForm);
+
+    // Set the form to the edit form.
+    editForm.form = Components[component.component.type].editForm();
+
+    //  Set the submission of this form to the component settings.
+    editForm.submission = {data: component.component};
+
+    // Register for when the edit form changes.
+    editForm.on('change', (event) => {
+      if (event.changed) {
+        updatePreview(event.data);
+      }
+    });
+
+    this.addEventListener(cancelButton, 'click', (event) => {
+      event.preventDefault();
+      dialog.close();
+    });
+
+    this.addEventListener(saveButton, 'click', (event) => {
+      event.preventDefault();
+      console.log(editForm.submission);
+    });
+
+    this.addEventListener(dialog, 'close', () => {
+      editForm.destroy();
+    });
+  }
+
+  destroy() {
+    super.destroy();
+    if (this.dragula) {
+      this.dragula.destroy();
+    }
   }
 
   buildSidebar() {
@@ -99,8 +245,11 @@ export class FormioFormBuilder extends FormioForm {
           ])
         ]);
         let groupBody = this.ce('div', {
-          class: 'panel-body'
+          class: 'panel-body no-drop'
         });
+
+        // Add this group body to the drag containers.
+        this.dragContainers.push(groupBody);
 
         let groupBodyClass = 'panel-collapse collapse';
         if (firstGroup) {
@@ -116,7 +265,8 @@ export class FormioFormBuilder extends FormioForm {
 
         _each(groupComponents, (builderInfo) => {
           let compButton = this.ce('span', {
-            class: 'btn btn-primary btn-xs btn-block formcomponent'
+            id: 'builder-' + builderInfo.key,
+            class: 'btn btn-primary btn-xs btn-block formcomponent drag-copy'
           });
           if (builderInfo.icon) {
             compButton.appendChild(this.ce('i', {
@@ -124,6 +274,8 @@ export class FormioFormBuilder extends FormioForm {
               style: 'margin-right: 5px;'
             }));
           }
+          console.log(builderInfo);
+          compButton.builderInfo = builderInfo;
           compButton.appendChild(this.text(builderInfo.title));
           groupBody.appendChild(compButton);
         });
@@ -137,6 +289,7 @@ export class FormioFormBuilder extends FormioForm {
   }
 
   build() {
+    this.dragContainers = [];
     this.builderElement = this.element;
     this.builderElement.setAttribute('class', 'row formbuilder');
 
@@ -152,13 +305,32 @@ export class FormioFormBuilder extends FormioForm {
     this.sideBarElement = this.buildSidebar();
     this.builderSidebar.appendChild(this.sideBarElement);
 
-    this.dragContainers = [];
     super.build();
-    dragula(this.dragContainers).on('drop', (element, target, source, sibling) => {
-      console.log(element);
-      console.log(target);
-      console.log(source);
-      console.log(sibling);
+    this.dragula = dragula(this.dragContainers, {
+      copy: function(el, source) {
+        return el.classList.contains('drag-copy');
+      },
+      accepts: function(el, target) {
+        return !target.classList.contains('no-drop');
+      }
+    }).on('drop', (element, target, source, sibling) => {
+      let builderElement = source.querySelector('#' + element.id);
+      if (
+        builderElement &&
+        builderElement.builderInfo &&
+        builderElement.builderInfo.schema
+      ) {
+
+        // Walk up the parent chain until we find the container component.
+        let containerComponent = element;
+        do { containerComponent = containerComponent.parentNode } while (containerComponent && !containerComponent.component);
+        if (containerComponent && containerComponent.component) {
+          containerComponent.component.addComponent(builderElement.builderInfo.schema, null, containerComponent.component.data, sibling);
+        }
+
+        // Remove the element.
+        target.removeChild(element);
+      }
     });
   }
 }

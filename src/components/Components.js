@@ -33,13 +33,14 @@ export class FormioComponents extends BaseComponent {
   everyComponent(cb) {
     const components = this.getComponents();
     _each(components, (component, index) => {
-      if (component.type === 'components') {
+      if (cb(component, components, index) === false) {
+        return false;
+      }
+
+      if (typeof component.everyComponent === 'function') {
         if (component.everyComponent(cb) === false) {
           return false;
         }
-      }
-      else if (cb(component, components, index) === false) {
-        return false;
       }
     });
   }
@@ -129,16 +130,22 @@ export class FormioComponents extends BaseComponent {
    * @param {Object} component - The component JSON schema to add.
    * @param {HTMLElement} element - The DOM element to append this child to.
    * @param {Object} data - The submission data object to house the data for this component.
+   * @param {HTMLElement} before - A DOM element to insert this element before.
    * @return {BaseComponent} - The created component instance.
    */
-  addComponent(component, element, data) {
+  addComponent(component, element, data, before) {
     element = element || this.getContainer();
     data = data || this.data;
     component.row = this.row;
     let comp = this.createComponent(component, this.options, data);
     this.setHidden(comp);
     element = this.hook('addComponent', element, comp);
-    element.appendChild(comp.getElement());
+    if (before) {
+      element.insertBefore(comp.getElement(), before);
+    }
+    else {
+      element.appendChild(comp.getElement());
+    }
     return comp;
   }
 

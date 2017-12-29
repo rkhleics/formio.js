@@ -1,9 +1,9 @@
 import { TextFieldComponent } from '../textfield/TextField';
 export class PasswordComponent extends TextFieldComponent {
-  elementInfo() {
-    let info = super.elementInfo();
-    info.attr.type = 'password';
-    return info;
+  static schema(...extend) {
+    return TextFieldComponent.schema({
+      type: 'password'
+    }, ...extend);
   }
 
   static get builderInfo() {
@@ -12,7 +12,14 @@ export class PasswordComponent extends TextFieldComponent {
       icon: 'fa fa-asterisk',
       group: 'basic',
       documentation: 'http://help.form.io/userguide/#password',
-      weight: 20
+      weight: 20,
+      schema: PasswordComponent.schema()
     };
+  }
+
+  elementInfo() {
+    let info = super.elementInfo();
+    info.attr.type = 'password';
+    return info;
   }
 }

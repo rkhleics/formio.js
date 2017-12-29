@@ -5,7 +5,7 @@ export class CheckBoxComponent extends BaseComponent {
     const info = super.elementInfo();
     info.type = 'input';
     info.changeEvent = 'click';
-    info.attr.type = this.component.inputType;
+    info.attr.type = this.component.inputType || 'checkbox';
     info.attr.class = '';
     if (this.component.name) {
       info.attr.name = `data[${this.component.name}]`;

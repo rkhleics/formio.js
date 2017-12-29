@@ -56,7 +56,6 @@
   "dependencies": {
     "browser-cookies": "^1.1.0",
     "choices.js": "^3.0.2",
-    "dialog-polyfill": "^0.4.9",
     "dragula": "^3.7.2",
     "eventemitter2": "^5.0.0",
     "flatpickr": "^4.1.4",
