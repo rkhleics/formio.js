@@ -35,6 +35,11 @@ export class ButtonComponent extends BaseComponent {
 
     // Add the shortcuts to the button element.
     this.addShortcut(this.buttonElement);
+
+    if (this.viewOnlyMode()) {
+      this.component.hidden = true;
+    }
+
     if (this.component.label) {
       this.labelElement = this.text(this.addShortcutToLabel());
       this.buttonElement.appendChild(this.labelElement);
