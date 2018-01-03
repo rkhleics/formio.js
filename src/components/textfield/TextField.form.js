@@ -1,4 +1,6 @@
 const BaseEditForm = require('../base/Base.form');
+import { TextFieldEditDisplay } from './editForm/TextField.edit.display';
+
 module.exports = function(...extend) {
   return BaseEditForm({
     components: [
