@@ -60,6 +60,12 @@ export class DataGridComponent extends FormioComponents {
     if (!this.shouldDisable) {
       let th = this.ce('th');
       tr.appendChild(th);
+
+      // add the "+" - "add another" button
+      if (this.component.addAnotherPosition === "top" || this.component.addAnotherPosition === "both") {
+        th.appendChild(this.addButton(true));
+        tr.appendChild(th);
+      }
     }
 
     thead.appendChild(tr);
@@ -121,14 +127,18 @@ export class DataGridComponent extends FormioComponents {
     });
 
     // Add the add button if not disabled.
-    if (!this.shouldDisable) {
-      let tr = this.ce('tr');
-      let td = this.ce('td', {
-        colspan: (this.component.components.length + 1)
-      });
-      td.appendChild(this.addButton());
-      tr.appendChild(td);
-      this.tbody.appendChild(tr);
+    if (!this.shouldDisable && (
+      !this.component.addAnotherPosition ||
+      this.component.addAnotherPosition === "bottom" ||
+      this.component.addAnotherPosition === "both"
+      )) {
+        let tr = this.ce('tr');
+        let td = this.ce('td', {
+          colspan: (this.component.components.length + 1)
+        });
+        td.appendChild(this.addButton());
+        tr.appendChild(td);
+        this.tbody.appendChild(tr);
     }
   }
 
@@ -172,13 +182,8 @@ export class DataGridComponent extends FormioComponents {
       return;
     }
 
-    this.value = value;
-
-    // Add needed rows.
-    for (let i=this.rows.length; i < value.length; i++) {
-      this.addValue();
-    }
-
+    this.value = this.data[this.component.key] = value;
+    this.buildRows();
     _each(this.rows, (row, index) => {
       if (value.length <= index) {
         return;

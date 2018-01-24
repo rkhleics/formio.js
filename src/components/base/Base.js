@@ -1,4 +1,4 @@
-import maskInput from 'text-mask-all/vanilla';
+import maskInput, { conformToMask } from 'vanilla-text-mask';
 import Promise from "native-promise-only";
 import _ from 'lodash';
 import _get from 'lodash/get';
@@ -11,10 +11,10 @@ import _defaults from 'lodash/defaults';
 import _isEqual from 'lodash/isEqual';
 import _isUndefined from 'lodash/isUndefined';
 import _toString from 'lodash/toString';
-import i18next from 'i18next';
 import FormioUtils from '../../utils';
 import { Validator } from '../Validator';
 import Tooltip from 'tooltip.js';
+import i18next from 'i18next';
 
 /**
  * This is the BaseComponent class which all elements within the FormioForm derive from.
@@ -146,6 +146,9 @@ export class BaseComponent {
       highlightErrors: true
     });
 
+    // Use the i18next that is passed in, otherwise use the global version.
+    this.i18next = this.options.i18next || i18next;
+
     /**
      * Determines if this component has a condition assigned to it.
      * @type {null}
@@ -273,7 +276,7 @@ export class BaseComponent {
      * The validators that are assigned to this component.
      * @type {[string]}
      */
-    this.validators = ['required', 'minLength', 'maxLength', 'custom', 'pattern', 'json'];
+    this.validators = ['required', 'minLength', 'maxLength', 'custom', 'pattern', 'json', 'mask'];
 
     /**
      * Used to trigger a new change in this component.
@@ -290,6 +293,9 @@ export class BaseComponent {
     // To force this component to be invalid.
     this.invalid = false;
 
+    // Determine if the component has been built.
+    this.isBuilt = false;
+
     /**
      * An array of the event listeners so that the destroy command can deregister them.
      * @type {Array}
@@ -298,7 +304,7 @@ export class BaseComponent {
 
     if (this.component) {
       this.type = this.component.type;
-      if (this.component.input && this.component.key) {
+      if (this.hasInput && this.component.key) {
         this.options.name += `[${this.component.key}]`;
       }
 
@@ -311,6 +317,10 @@ export class BaseComponent {
 
     // Allow anyone to hook into the component creation.
     this.hook('component');
+  }
+
+  get hasInput() {
+    return this.component.input || this.inputs.length;
   }
 
   /**
@@ -328,7 +338,8 @@ export class BaseComponent {
     params.keySeparator = '.|.';
     params.pluralSeparator = '._.';
     params.contextSeparator = '._.';
-    return i18next.t(text, params);
+    let translated = this.i18next.t(text, params);
+    return translated || text;
   }
 
   /**
@@ -380,7 +391,7 @@ export class BaseComponent {
    */
   getIcon(name) {
     return this.ce('i', {
-      class: `glyphicon glyphicon-${name}`
+      class: this.iconClass(name)
     });
   }
 
@@ -584,7 +595,7 @@ export class BaseComponent {
    * @returns {string} - The class name of this component.
    */
   get className() {
-    let className = this.component.input ? 'form-group has-feedback ' : '';
+    let className = this.hasInput ? 'form-group has-feedback ' : '';
     className += `formio-component formio-component-${this.component.type} `;
     if (this.component.key) {
       className += `formio-component-${this.component.key} `;
@@ -592,7 +603,7 @@ export class BaseComponent {
     if (this.component.customClass) {
       className += this.component.customClass;
     }
-    if (this.component.input && this.component.validate && this.component.validate.required) {
+    if (this.hasInput && this.component.validate && this.component.validate.required) {
       className += ' required';
     }
     return className;
@@ -709,6 +720,14 @@ export class BaseComponent {
         }
       }
     }
+
+    if (this._inputMask) {
+      defaultValue = conformToMask(defaultValue, this._inputMask).conformedValue;
+      if (!FormioUtils.matchInputMask(defaultValue, this._inputMask)) {
+        defaultValue = '';
+      }
+    }
+
     return defaultValue;
   }
 
@@ -728,7 +747,7 @@ export class BaseComponent {
     if (!this.data[this.component.key]) {
       this.data[this.component.key] = [];
     }
-    if (!_isArray(this.data[this.component.key])) {
+    if (this.data[this.component.key] && !_isArray(this.data[this.component.key])) {
       this.data[this.component.key] = [this.data[this.component.key]];
     }
     this.data[this.component.key].push(this.defaultValue);
@@ -796,11 +815,33 @@ export class BaseComponent {
     }
   }
 
+  bootstrap4Theme(name) {
+    return (name === 'default') ? 'secondary' : name;
+  }
+
+  iconClass(name, spinning) {
+    if (!this.options.icons || this.options.icons === 'glyphicon') {
+      return spinning ? `glyphicon glyphicon-${name} glyphicon-spin` : `glyphicon glyphicon-${name}`;
+    }
+    switch (name) {
+      case 'zoom-in':
+        return 'fa fa-search-plus';
+      case 'zoom-out':
+        return 'fa fa-search-minus';
+      case 'question-sign':
+        return `fa fa-question-circle`;
+      case 'remove-circle':
+        return `fa fa-times-circle-o`;
+      default:
+        return spinning ? `fa fa-${name} fa-spin` : `fa fa-${name}`;
+    }
+  }
+
   /**
    * Adds a new button to add new rows to the multiple input elements.
    * @returns {HTMLElement} - The "Add New" button html element.
    */
-  addButton() {
+  addButton(justIcon) {
     let addButton = this.ce('a', {
       class: 'btn btn-primary'
     });
@@ -809,12 +850,19 @@ export class BaseComponent {
       this.addValue();
     });
 
-    let addIcon = this.ce('span', {
-      class: 'glyphicon glyphicon-plus'
+    let addIcon = this.ce('i', {
+      class: this.iconClass('plus')
     });
-    addButton.appendChild(addIcon);
-    addButton.appendChild(this.text(this.component.addAnother || ' Add Another'));
-    return addButton;
+
+    if (justIcon) {
+      addButton.appendChild(addIcon);
+      return addButton;
+    }
+    else {
+      addButton.appendChild(addIcon);
+      addButton.appendChild(this.text(this.component.addAnother || ' Add Another'));
+      return addButton;
+    }
   }
 
   /**
@@ -850,7 +898,7 @@ export class BaseComponent {
   removeButton(index) {
     let removeButton = this.ce('button', {
       type: 'button',
-      class: 'btn btn-default',
+      class: 'btn btn-default btn-secondary',
       tabindex: '-1'
     });
 
@@ -859,8 +907,8 @@ export class BaseComponent {
       this.removeValue(index);
     });
 
-    let removeIcon = this.ce('span', {
-      class: 'glyphicon glyphicon-remove-circle'
+    let removeIcon = this.ce('i', {
+      class: this.iconClass('remove-circle')
     });
     removeButton.appendChild(removeIcon);
     return removeButton;
@@ -964,7 +1012,7 @@ export class BaseComponent {
       }
     }
 
-    if (this.component.input && this.component.validate && this.component.validate.required) {
+    if (this.hasInput && this.component.validate && this.component.validate.required) {
       className += ' field-required';
     }
     this.labelElement = this.ce('label', {
@@ -1045,7 +1093,7 @@ export class BaseComponent {
    */
   createTooltip(container, component, classes) {
     component = component || this.component;
-    classes = classes || 'glyphicon glyphicon-question-sign text-muted';
+    classes = classes || `${this.iconClass('question-sign')} text-muted`;
     if (!component.tooltip) {
       return;
     }
@@ -1087,7 +1135,7 @@ export class BaseComponent {
       return;
     }
     this.errorElement = this.ce('div', {
-      class: 'formio-errors'
+      class: 'formio-errors invalid-feedback'
     });
     this.errorContainer.appendChild(this.errorElement);
   }
@@ -1149,50 +1197,12 @@ export class BaseComponent {
   }
 
   /**
-   * Returns an input mask that is compatible with the input mask library.
-   * @param {string} mask - The Form.io input mask.
-   * @returns {Array} - The input mask for the mask library.
-   */
-  getInputMask(mask) {
-    if (mask instanceof Array) {
-      return mask;
-    }
-    let maskArray = [];
-    maskArray.numeric = true;
-    for (let i=0; i < mask.length; i++) {
-      switch (mask[i]) {
-        case '9':
-          maskArray.push(/\d/);
-          break;
-        case 'A':
-          maskArray.numeric = false;
-          maskArray.push(/[a-zA-Z]/);
-          break;
-        case 'a':
-          maskArray.numeric = false;
-          maskArray.push(/[a-z]/);
-          break;
-        case '*':
-          maskArray.numeric = false;
-          maskArray.push(/[a-zA-Z0-9]/);
-          break;
-        default:
-          maskArray.push(mask[i]);
-          break;
-      }
-    }
-    return maskArray;
-  }
-
-  /**
    * Creates a new input mask placeholder.
    * @param {HTMLElement} mask - The input mask.
    * @returns {string} - The placeholder that will exist within the input as they type.
    */
   maskPlaceholder(mask) {
-    return mask.map((char) => {
-      return (char instanceof RegExp) ? '_' : char
-    }).join('')
+    return mask.map((char) => (char instanceof RegExp) ? '_' : char).join('');
   }
 
   /**
@@ -1201,10 +1211,11 @@ export class BaseComponent {
    */
   setInputMask(input) {
     if (input && this.component.inputMask) {
-      let mask = this.getInputMask(this.component.inputMask);
+      const mask = FormioUtils.getInputMask(this.component.inputMask);
+      this._inputMask = mask;
       this.inputMask = maskInput({
         inputElement: input,
-        mask: mask
+        mask
       });
       if (mask.numeric) {
         input.setAttribute('pattern', "\\d*");
@@ -1253,6 +1264,10 @@ export class BaseComponent {
   }
 
   redraw() {
+    // Don't bother if we have not built yet.
+    if (!this.isBuilt) {
+      return;
+    }
     this.clear();
     this.build();
   }
@@ -1270,8 +1285,37 @@ export class BaseComponent {
       }
     });
     _each(this.eventHandlers, (handler) => {
-      window.removeEventListener(handler.event, handler.func);
+      if (handler.event) {
+        window.removeEventListener(handler.event, handler.func);
+      }
     });
+  }
+
+  /**
+   * Render a template string into html.
+   *
+   * @param template
+   * @param data
+   * @param actions
+   *
+   * @return {HTMLElement} - The created element.
+   */
+  renderTemplate(template, data, actions = []) {
+    // Create a container div.
+    const div = this.ce('div');
+
+    // Interpolate the template and populate
+    div.innerHTML = FormioUtils.interpolate(template, data);
+
+    // Add actions to matching elements.
+    actions.forEach(action => {
+      const elements = div.getElementsByClassName(action.class);
+      Array.prototype.forEach.call(elements, element => {
+        element.addEventListener(action.event, action.action);
+      });
+    });
+
+    return div;
   }
 
   /**
@@ -1420,6 +1464,7 @@ export class BaseComponent {
 
     // Add error classes
     this.addClass(this.element, 'has-error');
+    this.inputs.forEach((input) => this.addClass(input, 'is-invalid'));
     if (dirty && this.options.highlightErrors) {
       this.addClass(this.element, 'alert alert-danger');
     }
@@ -1577,7 +1622,7 @@ export class BaseComponent {
   }
 
   getValue() {
-    if (!this.component.input) {
+    if (!this.hasInput) {
       return;
     }
     const values = [];
@@ -1611,6 +1656,10 @@ export class BaseComponent {
    * @param flags
    */
   updateValue(flags) {
+    if (!this.hasInput) {
+      return false;
+    }
+
     flags = flags || {};
     const value = this.data[this.component.key];
     this.data[this.component.key] = this.getValue(flags);
@@ -1670,9 +1719,9 @@ export class BaseComponent {
         eval(this.component.calculateValue.toString());
         changed = this.setValue(value, flags);
       }
-      catch (e) {
+      catch (err) {
         /* eslint-disable no-console */
-        console.warn(`An error occurred calculating a value for ${this.component.key}`, e);
+        console.warn(`An error occurred calculating a value for ${this.component.key}`, err);
         changed = false;
         /* eslint-enable no-console */
       }
@@ -1688,7 +1737,7 @@ export class BaseComponent {
       }
       catch (err) {
         /* eslint-disable no-console */
-        console.warn(`An error occurred calculating a value for ${this.component.key}`, e);
+        console.warn(`An error occurred calculating a value for ${this.component.key}`, err);
         changed = false;
         /* eslint-enable no-console */
       }
@@ -1734,7 +1783,7 @@ export class BaseComponent {
    */
   invalidMessage(data, dirty) {
     // No need to check for errors if there is no input or if it is pristine.
-    if (!this.component.input || (!dirty && this.pristine)) {
+    if (!this.hasInput || (!dirty && this.pristine)) {
       return '';
     }
 
@@ -1797,6 +1846,7 @@ export class BaseComponent {
       catch (err) {}
     }
     this.removeClass(this.element, 'has-error');
+    this.inputs.forEach((input) => this.removeClass(input, 'is-invalid'));
     if (this.options.highlightErrors) {
       this.removeClass(this.element, 'alert alert-danger');
     }
@@ -1853,10 +1903,14 @@ export class BaseComponent {
    */
   setValue(value, flags) {
     flags = this.getFlags.apply(this, arguments);
-    if (!this.component.input) {
+    if (!this.hasInput) {
       return false;
     }
+    if (this.component.multiple && !_isArray(value)) {
+      value = [value];
+    }
     this.value = value;
+    this.buildRows();
     const isArray = _isArray(value);
     for (let i in this.inputs) {
       if (this.inputs.hasOwnProperty(i)) {
@@ -1917,7 +1971,7 @@ export class BaseComponent {
     element.loading = loading;
     if (!element.loader && loading) {
       element.loader = this.ce('i', {
-        class: 'glyphicon glyphicon-refresh glyphicon-spin button-icon-right'
+        class: this.iconClass('refresh', true) + ' button-icon-right'
       });
     }
     if (element.loader) {
@@ -2002,7 +2056,7 @@ export class BaseComponent {
       type: this.component.inputType || 'text',
       class: 'form-control',
       lang: this.options.language
-  };
+    };
 
     if (this.component.placeholder) {
       attributes.placeholder = this.t(this.component.placeholder);
@@ -2010,6 +2064,10 @@ export class BaseComponent {
 
     if (this.component.tabindex) {
       attributes.tabindex = this.component.tabindex;
+    }
+
+    if (this.component.autofocus) {
+      attributes.autofocus = this.component.autofocus;
     }
 
     return {

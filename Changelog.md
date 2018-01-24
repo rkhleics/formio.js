@@ -4,6 +4,113 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.28.6
+### Added 
+ - Autofocus capability.
+ - Ability to provide spellcheck parameter to input.
+
+### Fixed
+ - Some issues with subforms when performing calcuated values
+ - Problems with subforms performing the load when they are not conditionally available.
+
+## 2.28.5
+### Fixed
+ - Issue with input mask crashing when no input mask is on the field.
+
+## 2.28.4
+### Added
+ - Mask validator for Phone Number.
+
+### Fixed
+ - Default value for component with input mask.
+
+## 2.28.3
+### Changed
+ - The conditional logic where a parent that is conditionally invisible is overridden by a child conditionally visible.
+   This logic is different from the Angular 1 renderer, so we made it consistent where a conditionally visible child will not
+   override a conditionally hidden parent. However, this behavior can be changed by providing the "conditional.overrideParent" flag
+   on the child component.
+
+## 2.28.2
+### Fixed
+ - Issues with the sub-form component not loading the proper source for remote servers.
+ - Issues with the sub-form component not passing along sub data to conditional checks properly.
+
+## 2.28.1
+### Fixed
+ - Text mask dependencies
+
+## 2.28.0
+### Added
+ - Support for Bootstrap 4
+ - EditGrid Component.
+ - Stripe integration within Contrib.
+
+### Fixed
+ - Small problem with read-only file uplaods where it would allow you to remove files.
+
+## 2.27.6
+### Fixed
+ - Issue where the ready promise was not getting fired if a submission is not provided.
+
+## 2.27.5
+### Fixed
+ - The package.json for the choices.js library to not use a git url.
+
+## 2.27.4
+### Added
+ - The ability for the search to be an array of values.
+
+## 2.27.3
+### Fixed
+ - Issue with the checkCalculated method not working for datagrids.
+
+## 2.27.2
+### Added
+ - Support for OAuth buttons in the renderer.
+ - Ability to add the "Add Another" button on datagrid to either above or below the grid.
+
+### Fixed
+ - Problem where a padding-right is applied to all has-feedback inputs even though an icon is not used.
+
+## 2.27.1
+### Fixed
+ - Problem with default values on wizards.
+ - Issue where row is not passed to calculated values.
+ - Select Resource component searching.
+
+### Added
+ - Ability to auto load the initial values for lazyLoad select with search enabled.
+ - CSS class ('radio-selected') for selected option of Radio component
+
+## 2.27.0
+### Fixed
+ - Issue where read-only forms would still try to submit.
+ - Problem with read-only wizards triggering beforeSubmit handlers.
+ - Fix issue where submissions made before revisions are made will sometimes cause the form to not load.
+
+### Changed
+ - Upgrade all dependencies
+
+## 2.26.2
+### Fixed
+ - Problem where a component has input should also return true if it has inputs.
+
+## 2.26.1
+### Fixed
+ - Problems where data keys are added even if component is not set with input.
+ - Failing tests.
+ - Datagrid data merging.
+
+### Changed
+ - Upgraded choices.js to 3.0.3 which includes performance fix.
+ - Removed performance hack in Select since 3.0.3 of choices resolves the problem.
+
+## 2.26.0
+### Added
+ - New contributed module system with Stripe integration.
+ - A way to pass the formio instance object to the currentUser and accessInfo methods.
+
 ## 2.25.8
 ### Added
  - Support for JSONLogic dates.
@@ -26,7 +133,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  - Ability to dynamically alter text based on input data.
  - Try/catch around the jsLogic for checkconditionals.
  - LazyLoading for select dropdowns.
- 
+
 ### Fixed
  - Caching issue with getTempToken method.
  - Problem with the "in" operator for JSONLogic crashing with null inputs.
@@ -59,10 +166,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
  - The ability to render Select component as plain select dropdown using widget: 'html5' setting.
  - Performance improvements to language selection
- 
+
 ### Changed
  - Moved all translation capabilities into FormioForm for performance reasons.
- 
+
 ### Fixed
  - Issues with Lodash operators for JSONLogic.
 
@@ -104,7 +211,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
  - File component inside Datagrid component.
  - Components with label position inside Datagrid component.
- 
+
 ### Added
  - Interpolation to the select headers when requests are made.
  - Option to make the wizard header buttons not clickable.

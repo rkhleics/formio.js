@@ -2,7 +2,6 @@ import { BaseComponent } from '../base/Base';
 import Choices from 'choices.js';
 import Formio from '../../formio';
 import _each from 'lodash/each';
-import _remove from 'lodash/remove';
 import _get from 'lodash/get';
 import _debounce from 'lodash/debounce';
 import _isEmpty from 'lodash/isEmpty';
@@ -12,21 +11,6 @@ import _isEqual from 'lodash/isEqual';
 import _isString from 'lodash/isString';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find  from 'lodash/find';
-
-// Fix performance issues in Choices by adding a debounce around render method.
-Choices.prototype._render = Choices.prototype.render;
-Choices.prototype.render = function() {
-  // Do not render destroyed choices widget.
-  if (this.destroyed) {
-    return;
-  }
-
-  if (this.renderDebounce) {
-    clearTimeout(this.renderDebounce);
-  }
-
-  this.renderDebounce = setTimeout(() => this._render(), 100);
-};
 
 export class SelectComponent extends BaseComponent {
   constructor(component, options, data) {
@@ -185,6 +169,9 @@ export class SelectComponent extends BaseComponent {
       this.selectContainer.appendChild(this.selectInput);
     }
 
+    // We are no longer loading.
+    this.loading = false;
+
     // If a value is provided, then select it.
     if (this.value) {
       this.setValue(this.value, true);
@@ -220,7 +207,12 @@ export class SelectComponent extends BaseComponent {
 
     // Add search capability.
     if (this.component.searchField && search) {
-      query[this.component.searchField] = search;
+      if (_isArray(search)) {
+        query[this.component.searchField + '__in'] = search.join(',');
+      }
+      else {
+        query[this.component.searchField] = search;
+      }
     }
 
     // Add filter capability
@@ -241,9 +233,11 @@ export class SelectComponent extends BaseComponent {
 
     // Make the request.
     options.header = headers;
+    this.loading = true;
     Formio.makeRequest(this.options.formio, 'select', url, method, body, options)
       .then((response) => this.setItems(response))
       .catch((err) => {
+        this.loading = false;
         this.events.emit('formio.error', err);
         console.warn(`Unable to load resources for ${this.component.key}`);
       });
@@ -286,7 +280,7 @@ export class SelectComponent extends BaseComponent {
     }
   }
 
-  updateItems(searchInput) {
+  updateItems(searchInput, forceUpdate) {
     if (!this.component.data) {
       console.warn(`Select component ${this.component.key} does not have data configuration.`);
       return;
@@ -304,7 +298,7 @@ export class SelectComponent extends BaseComponent {
         this.updateCustomItems();
         break;
       case 'resource':
-        if (!this.active) {
+        if (!forceUpdate && !this.active) {
           // If we are lazyLoading, wait until activated.
           return;
         }
@@ -319,7 +313,7 @@ export class SelectComponent extends BaseComponent {
         }
         break;
       case 'url':
-        if (!this.active) {
+        if (!forceUpdate && !this.active) {
           // If we are lazyLoading, wait until activated.
           return;
         }
@@ -369,7 +363,7 @@ export class SelectComponent extends BaseComponent {
     if (this.choices) {
       this.choices.setChoices([{
         value: '',
-        label: '<span class="glyphicon glyphicon-refresh glyphicon-spin" style="font-size:1.3em;"></span>'
+        label: `<i class="${this.iconClass('refresh')}" style="font-size:1.3em;"></i>`
       }], 'value', 'label', true);
     }
     else {
@@ -402,6 +396,7 @@ export class SelectComponent extends BaseComponent {
         containerOuter: 'choices form-group formio-choices',
         containerInner: 'form-control'
       },
+      itemComparer: _isEqual,
       placeholder: !!this.component.placeholder,
       placeholderValue: placeholderValue,
       searchPlaceholderValue: placeholderValue,
@@ -419,6 +414,7 @@ export class SelectComponent extends BaseComponent {
     // If a search field is provided, then add an event listener to update items on search.
     if (this.component.searchField) {
       this.addEventListener(input, 'search', (event) => this.triggerUpdate(event.detail.value));
+      this.addEventListener(input, 'stopSearch', () => this.triggerUpdate());
     }
 
     this.addEventListener(input, 'showDropdown', () => {
@@ -504,14 +500,36 @@ export class SelectComponent extends BaseComponent {
     let hasValue = _isArray(value) ? value.length : value;
     this.value = value;
 
+    // Do not set the value if we are loading... that will happen after it is done.
+    if (this.loading) {
+      return;
+    }
+
+    // Determine if we need to perform an initial lazyLoad api call if searchField is provided.
+    if (
+      this.component.searchField &&
+      this.component.lazyLoad &&
+      !this.lazyLoadInit &&
+      !this.active &&
+      !this.selectOptions.length &&
+      hasValue
+    ) {
+      this.loading = true;
+      this.lazyLoadInit = true;
+      this.triggerUpdate(this.value, true);
+      return;
+    }
+
     // Add the value options.
     this.addValueOptions();
 
     if (this.choices) {
       // Now set the value.
       if (hasValue) {
-        this.choices.setChoices(this.selectOptions, 'value', 'label', true);
-        this.choices.setValueByChoice(_isArray(value) ? value : [value])
+        this.choices
+          .removeActiveItems()
+          .setChoices(this.selectOptions, 'value', 'label', true)
+          .setValueByChoice(_isArray(value) ? value : [value])
       }
       else if (hasPreviousValue) {
         this.choices.removeActiveItems();

@@ -10,24 +10,22 @@ export class RadioComponent extends BaseComponent {
     const info = super.elementInfo();
     info.type = 'input';
     info.changeEvent = 'click';
-    info.attr.class = '';
+    info.attr.class = 'form-check-input';
     return info;
   }
 
   createInput(container) {
-    const inputGroup = this.ce('div', {
-      class: 'input-group'
-    });
-    const inputType = this.component.inputType;
+    const inputGroup = this.ce('div');
     const labelOnTheTopOrOnTheLeft = this.optionsLabelOnTheTopOrLeft();
+    var wrappers = [];
 
     _each(this.component.values, (value) => {
-      const wrapperClass = (this.component.inline ? `${inputType}-inline` : inputType);
+      const wrapperClass = `form-check ${this.optionWrapperClass}`;
       const labelWrapper = this.ce('div', {
         class: wrapperClass
       });
       const label = this.ce('label', {
-        class: 'control-label'
+        class: 'control-label form-check-label'
       });
 
       this.addShortcut(label, value.shortcut);
@@ -43,7 +41,7 @@ export class RadioComponent extends BaseComponent {
 
       // Create the input.
       const input = this.ce('input');
-      _each(this.info.attr, function(value, key) {
+      _each(this.info.attr, function (value, key) {
         input.setAttribute(key, value);
       });
 
@@ -63,9 +61,17 @@ export class RadioComponent extends BaseComponent {
       labelWrapper.appendChild(label);
 
       inputGroup.appendChild(labelWrapper);
+      wrappers.push(labelWrapper);
     });
+    this.wrappers = wrappers;
     container.appendChild(inputGroup);
     this.errorContainer = container;
+  }
+
+  get optionWrapperClass() {
+    const inputType = this.component.inputType;
+    const wrapperClass = (this.component.inline ? `form-check-inline ${inputType}-inline` : inputType);
+    return wrapperClass;
   }
 
   createViewOnlyInput() {
@@ -163,6 +169,27 @@ export class RadioComponent extends BaseComponent {
 
       this.inputs[index].checked = (inputValue === value);
     }
+  }
+
+  updateValue(value, flags) {
+    const changed = super.updateValue(value, flags);
+    if (changed) {
+      //add/remove selected option class
+      const value = this.data[this.component.key];
+      const optionSelectedClass = 'radio-selected';
+
+      _each(this.wrappers, (wrapper, index) => {
+        var input = this.inputs[index];
+        if (input.value === value) {
+          //add class to container when selected
+          this.addClass(wrapper, optionSelectedClass);
+
+        } else {
+          this.removeClass(wrapper, optionSelectedClass);
+        }
+      });
+    }
+    return changed;
   }
 
   destroy() {

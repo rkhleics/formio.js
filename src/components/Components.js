@@ -116,6 +116,7 @@ export class FormioComponents extends BaseComponent {
     comp.parent = this;
     comp.root = this.root || this;
     comp.build();
+    comp.isBuilt = true;
     this.components.push(comp);
     return comp;
   }
@@ -275,7 +276,13 @@ export class FormioComponents extends BaseComponent {
     let show = false;
     _each(this.getComponents(), (comp) => {
       const compShow = comp.checkConditions(data);
-      forceShow |= (comp.hasCondition() && compShow);
+      forceShow |= (
+        comp.hasCondition() &&
+        compShow &&
+        comp.component &&
+        comp.component.conditional &&
+        comp.component.conditional.overrideParent
+      );
       show |= compShow;
     });
 
@@ -419,7 +426,7 @@ export class FormioComponents extends BaseComponent {
       else if (value && value.hasOwnProperty(component.component.key)) {
         changed |= component.setValue(value[component.component.key], flags);
       }
-      else if (component.component.input) {
+      else if (component.hasInput) {
         flags.noValidate = true;
         changed |= component.setValue(null, flags);
       }

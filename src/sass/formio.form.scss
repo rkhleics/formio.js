@@ -8,6 +8,10 @@
   background-color: #fff;
 }
 
+.has-feedback .form-control {
+  padding-right: 10px;
+}
+
 .has-error.bg-danger {
   padding: 4px;
 }
@@ -181,7 +185,7 @@ td > .form-group {
   border-color: #127abe;
 }
 
-.formio-component-file .fileSelector .glyphicon {
+.formio-component-file .fileSelector .glyphicon, .formio-component-file .fileSelector .fa {
   font-size: 20px;
   margin-right: 5px;
 }
@@ -558,4 +562,8 @@ body.formio-dialog-open {
 .radio-inline label {
   font-weight: 400;
   cursor: pointer;
+}
+
+.editgrid-listgroup {
+  margin-bottom: 10px;
 }

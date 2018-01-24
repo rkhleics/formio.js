@@ -96,6 +96,15 @@ export class FormioWizard extends FormioForm {
   }
 
   nextPage() {
+    // Read-only forms should not worry about validation before going to next page, nor should they submit.
+    if (this.options.readOnly) {
+      this.history.push(this.page);
+      return this.setPage(this.getNextPage(this.submission.data, this.page)).then(() => {
+        this._nextPage = this.getNextPage(this.submission.data, this.page);
+        this.emit('nextPage', {page: this.page, submission: this.submission});
+      });
+    }
+
     // Validate the form builed, before go to the next page
     if (this.checkValidity(this.submission.data, true)) {
       this.checkData(this.submission.data, {
@@ -267,9 +276,15 @@ export class FormioWizard extends FormioForm {
       clickable: true
     });
 
-    this.wizardHeader = this.ce('ul', {
+    this.wizardHeader = this.ce('nav', {
+      'aria-label': 'navigation'
+    });
+
+    this.wizardHeaderList = this.ce('ul', {
       class: 'pagination'
     });
+
+    this.wizardHeader.appendChild(this.wizardHeaderList);
 
     // Add the header to the beginning.
     this.prepend(this.wizardHeader);
@@ -283,9 +298,11 @@ export class FormioWizard extends FormioForm {
 
       // Set clickable based on breadcrumb settings
       let clickable = this.page !== i && this.options.breadcrumbSettings.clickable
+      let pageClass = 'page-item ';
+      pageClass += (i === this.page) ? 'active' : (clickable ? '' : 'disabled');
 
       let pageButton = this.ce('li', {
-        class: (i === this.page) ? 'active' : (clickable ? '' : 'disabled'),
+        class: pageClass,
         style: (clickable) ? 'cursor: pointer;' : ''
       });
 
@@ -298,7 +315,9 @@ export class FormioWizard extends FormioForm {
         });
       }
 
-      let pageLabel = this.ce('span');
+      let pageLabel = this.ce('span', {
+        class: 'page-link'
+      });
       let pageTitle = page.title;
       if (currentPage.breadcrumb.toLowerCase() === 'condensed') {
         pageTitle = ((i === this.page) || showHistory) ? page.title : (i + 1);
@@ -309,7 +328,7 @@ export class FormioWizard extends FormioForm {
 
       pageLabel.appendChild(this.text(pageTitle));
       pageButton.appendChild(pageLabel);
-      this.wizardHeader.appendChild(pageButton);
+      this.wizardHeaderList.appendChild(pageButton);
     });
   }
 
@@ -383,7 +402,7 @@ export class FormioWizard extends FormioForm {
     });
     this.element.appendChild(this.wizardNav);
     each([
-      {name: 'cancel',    method: 'cancel',   class: 'btn btn-default'},
+      {name: 'cancel',    method: 'cancel',   class: 'btn btn-default btn-secondary'},
       {name: 'previous',  method: 'prevPage', class: 'btn btn-primary'},
       {name: 'next',      method: 'nextPage', class: 'btn btn-primary'},
       {name: 'submit',    method: 'submit',   class: 'btn btn-primary'}
@@ -391,7 +410,9 @@ export class FormioWizard extends FormioForm {
       if (!this.hasButton(button.name, nextPage)) {
         return;
       }
-      let buttonWrapper = this.ce('li');
+      let buttonWrapper = this.ce('li', {
+        class: 'list-inline-item'
+      });
       let buttonProp = button.name + 'Button';
       let buttonElement = this[buttonProp] = this.ce('button', {
         class: button.class + ' btn-wizard-nav-' + button.name

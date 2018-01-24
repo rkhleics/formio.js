@@ -1,6 +1,6 @@
-import maskInput from 'text-mask-all/vanilla';
+import maskInput from 'vanilla-text-mask';
 import _get from 'lodash/get';
-import createNumberMask from 'text-mask-all/addons/dist/createNumberMask';
+import { createNumberMask } from 'text-mask-addons';
 import { BaseComponent } from '../base/Base';
 
 export class NumberComponent extends BaseComponent {
@@ -31,8 +31,8 @@ export class NumberComponent extends BaseComponent {
     super(component, options, data);
     this.validators = this.validators.concat(['min', 'max']);
 
-    this.decimalSeparator = options.decimalSeparator = options.decimalSeparator || (12345.6789).toLocaleString(options.language).match(/345(.*)67/)[1];
-    this.thousandsSeparator = options.thousandsSeparator = options.thousandsSeparator || (12345.6789).toLocaleString(options.language).match(/12(.*)345/)[1];
+    this.decimalSeparator = options.decimalSeparator = options.decimalSeparator || (12345.6789).toLocaleString(options.language || 'en').match(/345(.*)67/)[1];
+    this.thousandsSeparator = options.thousandsSeparator = options.thousandsSeparator || (12345.6789).toLocaleString(options.language || 'en').match(/12(.*)345/)[1];
 
     // Determine the decimal limit. Defaults to 20 but can be overridden by validate.step or decimalLimit settings.
     this.decimalLimit = 20;
@@ -68,10 +68,10 @@ export class NumberComponent extends BaseComponent {
     }
 
     if (this.component.validate && this.component.validate.integer) {
-      return parseInt(value, 10).toLocaleString(this.options.language, this.getFormatOptions());
+      return parseInt(value, 10).toLocaleString(this.options.language || 'en', this.getFormatOptions());
     }
     else {
-      return parseFloat(value).toLocaleString(this.options.language, this.getFormatOptions());
+      return parseFloat(value).toLocaleString(this.options.language || 'en', this.getFormatOptions());
     }
   }
 

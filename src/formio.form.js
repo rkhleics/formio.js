@@ -20,7 +20,8 @@ Formio.forms = {};
 
 let getOptions = function(options) {
   options = _defaults(options, {
-    submitOnEnter: false
+    submitOnEnter: false,
+    i18next: i18next
   });
   if (!options.events) {
     options.events = new EventEmitter({
@@ -407,6 +408,9 @@ export class FormioForm extends FormioComponents {
         (err) => this.submissionReadyReject(err)
       );
     }
+    else {
+      this.submissionReadyResolve();
+    }
   }
 
   /**
@@ -416,17 +420,18 @@ export class FormioForm extends FormioComponents {
    * @param options
    */
   setSrc(value, options) {
-    this.setUrl(value, options);
-    this.nosubmit = false;
-    this.formio.loadForm().then(
-      (form) => {
-        var setForm = this.setForm(form);
-        this.loadSubmission();
-        return setForm;
-      }).catch((err) => {
+    if (this.setUrl(value, options)) {
+      this.nosubmit = false;
+      this.formio.loadForm({params: {live: 1}}).then(
+        (form) => {
+          var setForm = this.setForm(form);
+          this.loadSubmission();
+          return setForm;
+        }).catch((err) => {
         console.warn(err);
         this.formReadyReject(err);
       });
+    }
   }
 
   /**
@@ -461,8 +466,12 @@ export class FormioForm extends FormioComponents {
    * @param options
    */
   setUrl(value, options) {
-    if (!value || typeof value !== 'string') {
-      return;
+    if (
+      !value ||
+      (typeof value !== 'string') ||
+      (value === this._src)
+    ) {
+      return false;
     }
     this._src = value;
     this.nosubmit = true;
@@ -472,6 +481,7 @@ export class FormioForm extends FormioComponents {
       // Set the options source so this can be passed to other components.
       this.options.src = value;
     }
+    return true;
   }
 
   /**
@@ -661,16 +671,22 @@ export class FormioForm extends FormioComponents {
 
   mergeData(_this, _that) {
     _mergeWith(_this, _that, (thisValue, thatValue) => {
-      if (_isArray(thisValue)) {
+      if (_isArray(thisValue) && _isArray(thatValue) && thisValue.length !== thatValue.length) {
         return thatValue;
       }
     });
   }
 
-  setValue(submission, flags) {
+  setValue(submission, flags, data) {
+    data = data || this.data;
+    if (!submission) {
+      return super.setValue(data, flags);
+    }
     submission = submission || {data: {}};
-    this.mergeData(this._submission, submission);
-    return super.setValue(this._submission.data, flags);
+    this.mergeData(data, submission.data);
+    this._submission = submission;
+    this._submission.data = data;
+    return super.setValue(data, flags);
   }
 
   getValue() {
@@ -679,7 +695,6 @@ export class FormioForm extends FormioComponents {
     }
     let submission = _clone(this._submission);
     submission.data = this.data;
-    this.mergeData(this._submission.data, submission.data);
     return submission;
   }
 
@@ -702,7 +717,7 @@ export class FormioForm extends FormioComponents {
     return this.onFormBuild = this.render().then(() => {
       this.formReadyResolve();
       this.onFormBuild = null;
-      this.setSubmission(this._submission);
+      this.setValue(this.submission);
     }).catch((err) => {
       console.warn(err);
       this.formReadyReject(err);
@@ -718,6 +733,7 @@ export class FormioForm extends FormioComponents {
       this.clear();
       return this.localize().then(() => {
         this.build();
+        this.isBuilt = true;
         this.onResize();
         this.on('resetForm', () => this.reset(), true);
         this.on('refreshData', () => this.updateValue());
@@ -765,7 +781,11 @@ export class FormioForm extends FormioComponents {
   build() {
     this.on('submitButton', () => this.submit(), true);
     this.addComponents();
-    this.checkConditions(this.getValue());
+    let submission = this.getValue();
+    this.checkConditions(submission);
+    this.checkData(submission.data, {
+      noValidate: true
+    });
   }
 
   /**
@@ -895,6 +915,11 @@ export class FormioForm extends FormioComponents {
 
   executeSubmit() {
     return new Promise((resolve, reject) => {
+      // Read-only forms should never submit.
+      if (this.options.readOnly) {
+        return resolve(this.submission);
+      }
+
       let submission = this.submission || {};
       this.hook('beforeSubmit', submission, (err) => {
         if (err) {
