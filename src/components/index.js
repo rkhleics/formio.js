@@ -5,7 +5,7 @@ import { ContainerComponent } from './container/Container';
 import { DataGridComponent } from './datagrid/DataGrid';
 import { DateTimeComponent } from './datetime/DateTime';
 import { DayComponent } from './day/Day';
-import { EditGridComponent } from './editrgrid/EditGrid';
+import { EditGridComponent } from './editgrid/EditGrid';
 import { HTMLComponent } from './html/HTML';
 import { HiddenComponent } from './hidden/Hidden';
 import { FormComponent } from './form/Form';
@@ -32,7 +32,7 @@ import { RadioComponent } from './radio/Radio';
 import { SelectBoxesComponent } from './selectboxes/SelectBoxes';
 import { SurveyComponent } from './survey/Survey';
 import { WellComponent } from './well/Well';
-import { GmapComponent } from './gmap/Gmap';
+import { LocationComponent } from './location/Location';
 import { FileComponent } from './file/File';
 import { TabsComponent } from "./tabs/Tabs";
 module.exports = {
@@ -71,7 +71,8 @@ module.exports = {
   selectboxes: SelectBoxesComponent,
   survey: SurveyComponent,
   well: WellComponent,
-  gmap: GmapComponent,
+  location: LocationComponent,
+  gmap: LocationComponent,
   file: FileComponent,
   create: function(component, options, data, nobuild) {
     let comp = null;

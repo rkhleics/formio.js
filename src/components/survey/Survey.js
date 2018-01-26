@@ -1,6 +1,28 @@
 import _each from 'lodash/each';
 import { BaseComponent } from '../base/Base';
+
 export class SurveyComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'survey',
+      label: 'Survey',
+      key: 'survey',
+      questions: [],
+      values: []
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Survey',
+      group: 'advanced',
+      icon: 'fa fa-list',
+      weight: 170,
+      documentation: 'http://help.form.io/userguide/#survey',
+      schema: SurveyComponent.schema()
+    };
+  }
+
   build() {
     this.createElement();
     const labelAtTheBottom = this.component.labelPosition === 'bottom';

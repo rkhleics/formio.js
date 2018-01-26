@@ -1,10 +1,47 @@
 import { BaseComponent } from '../base/Base';
 import _get from 'lodash/get';
-import _each from 'lodash/each';
 import _assign from 'lodash/assign';
 import moment from 'moment';
 import { getLocaleDateFormatInfo } from '../../utils';
+
 export class DayComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'day',
+      label: 'Day',
+      key: 'day',
+      fields: {
+        day: {
+          type: 'number',
+          placeholder: '',
+          required: false
+        },
+        month: {
+          type: 'select',
+          placeholder: '',
+          required: false
+        },
+        year: {
+          type: 'number',
+          placeholder: '',
+          required: false
+        }
+      },
+      dayFirst: false
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Day',
+      group: 'advanced',
+      icon: 'fa fa-calendar',
+      documentation: 'http://help.form.io/userguide/#day',
+      weight: 50,
+      schema: DayComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.validators.push('date');

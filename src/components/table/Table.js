@@ -1,6 +1,39 @@
 import _each from 'lodash/each';
 import { FormioComponents } from '../Components';
+
 export class TableComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      type: 'table',
+      input: false,
+      key: 'table',
+      numRows: 3,
+      numCols: 3,
+      rows: [
+        [{components: []}, {components: []}, {components: []}],
+        [{components: []}, {components: []}, {components: []}],
+        [{components: []}, {components: []}, {components: []}]
+      ],
+      header: [],
+      caption: '',
+      striped: false,
+      bordered: false,
+      hover: false,
+      condensed: false
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Table',
+      group: 'layout',
+      icon: 'fa fa-table',
+      weight: 40,
+      documentation: 'http://help.form.io/userguide/#table',
+      schema: TableComponent.schema()
+    };
+  }
+
   build() {
     this.element = this.ce('div', {
       class: 'table-responsive'

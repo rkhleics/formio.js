@@ -3,7 +3,30 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _clone from 'lodash/clone';
 import _isArray from 'lodash/isArray';
 import { FormioComponents } from '../Components';
+
 export class DataGridComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      label: 'Data Grid',
+      key: 'dataGrid',
+      type: 'datagrid',
+      clearOnHide: true,
+      input: true,
+      components: []
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Data Grid',
+      icon: 'fa fa-th',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#datagrid',
+      weight: 150,
+      schema: DataGridComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.type = 'datagrid';

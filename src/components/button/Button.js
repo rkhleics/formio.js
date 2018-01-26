@@ -3,6 +3,32 @@ import FormioUtils from '../../utils';
 import _each from 'lodash/each';
 
 export class ButtonComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'button',
+      label: 'Submit',
+      key: 'submit',
+      size: 'md',
+      leftIcon: '',
+      rightIcon: '',
+      block: false,
+      action: 'submit',
+      disableOnInvalid: false,
+      theme: 'primary'
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Button',
+      group: 'basic',
+      icon: 'fa fa-stop',
+      documentation: 'http://help.form.io/userguide/#button',
+      weight: 110,
+      schema: ButtonComponent.schema()
+    };
+  }
+
   elementInfo() {
     let info = super.elementInfo();
     info.type = 'button';

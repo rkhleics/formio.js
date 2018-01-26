@@ -1,6 +1,29 @@
 import { SelectComponent } from '../select/Select';
-import dialogPolyfill from 'dialog-polyfill';
+
 export class ResourceComponent extends SelectComponent {
+  static schema(...extend) {
+    return SelectComponent.schema({
+      type: 'resource',
+      label: 'Resource',
+      key: 'resource',
+      dataSrc: 'resource',
+      resource: '',
+      project: '',
+      template: '<span>{{ item.data }}</span>'
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Resource',
+      group: 'advanced',
+      icon: 'fa fa-files-o',
+      weight: 90,
+      documentation: 'http://help.form.io/userguide/#resource',
+      schema: ResourceComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.component.dataSrc = 'resource';

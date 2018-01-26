@@ -1,9 +1,12 @@
 import { TextFieldComponent } from '../textfield/TextField';
 import { BaseComponent } from '../base/Base';
+
 export class TextAreaComponent extends TextFieldComponent {
   static schema(...extend) {
     return TextFieldComponent.schema({
       type: 'textarea',
+      label: 'Text Area',
+      key: 'textArea',
       rows: 3,
       wysiwyg: false,
       editor: ''

@@ -1,8 +1,11 @@
 import { TextFieldComponent } from '../textfield/TextField';
+
 export class PasswordComponent extends TextFieldComponent {
   static schema(...extend) {
     return TextFieldComponent.schema({
-      type: 'password'
+      type: 'password',
+      label: 'Password',
+      key: 'password'
     }, ...extend);
   }
 

@@ -13,6 +13,39 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _find  from 'lodash/find';
 
 export class SelectComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'select',
+      label: 'Select',
+      key: 'select',
+      data: {
+        values: [],
+        json: '',
+        url: '',
+        resource: '',
+        custom: ''
+      },
+      dataSrc: 'values',
+      valueProperty: '',
+      refreshOn: '',
+      filter: '',
+      authenticate: false,
+      template: '<span>{{ item.label }}</span>',
+      selectFields: ''
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Select',
+      group: 'basic',
+      icon: 'fa fa-th-list',
+      weight: 70,
+      documentation: 'http://help.form.io/userguide/#select',
+      schema: SelectComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
 

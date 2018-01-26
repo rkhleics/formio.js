@@ -7,6 +7,8 @@ export class NumberComponent extends BaseComponent {
   static schema(...extend) {
     return BaseComponent.schema({
       type: 'number',
+      label: 'Number',
+      key: 'number',
       validate: {
         min: '',
         max: '',

@@ -1,6 +1,33 @@
 import _each from 'lodash/each';
 import { FormioComponents } from '../Components';
+
 export class TabsComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      type: 'tabs',
+      input: false,
+      key: 'tabs',
+      components: [
+        {
+          label: 'Tab 1',
+          key: 'tab1',
+          components: []
+        }
+      ]
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Tabs',
+      group: 'layout',
+      icon: 'fa fa-folder-o',
+      weight: 50,
+      documentation: 'http://help.form.io/userguide/#tabs',
+      schema: TabsComponent.schema()
+    };
+  }
+
   createElement() {
     this.tabBar = this.ce('ul', {
       class: 'nav nav-tabs'

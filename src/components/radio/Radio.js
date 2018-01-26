@@ -5,7 +5,30 @@ import _get from 'lodash/get';
 import _isString from 'lodash/isString';
 import _toString from 'lodash/toString';
 import _find from 'lodash/find';
+
 export class RadioComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'radio',
+      inputType: 'radio',
+      label: 'Radio',
+      key: 'radio',
+      values: [],
+      fieldSet: false
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Radio',
+      group: 'basic',
+      icon: 'fa fa-dot-circle-o',
+      weight: 80,
+      documentation: 'http://help.form.io/userguide/#radio',
+      schema: RadioComponent.schema()
+    };
+  }
+
   elementInfo() {
     const info = super.elementInfo();
     info.type = 'input';

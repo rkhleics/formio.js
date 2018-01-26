@@ -7,6 +7,49 @@ import { FormioComponents } from '../Components';
 import FormioUtils from '../../utils';
 
 export class EditGridComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      type: 'editgrid',
+      label: 'Edit Grid',
+      key: 'editGrid',
+      clearOnHide: true,
+      input: true,
+      components: [],
+      templates: {
+        header: `
+          <div class="row">
+            {% util.eachComponent(components, function(component) { %}
+              <div class="col-sm-2">{{ component.label }}</div>
+            {% }) %}
+          </div>`,
+        row: `
+          <div class="row">
+            {% util.eachComponent(components, function(component) { %}
+              <div class="col-sm-2">{{ row[component.key] }}</div>
+            {% }) %}
+            <div class="col-sm-2">
+              <div class="btn-group pull-right">
+                <div class="btn btn-default editRow">Edit</div>
+                <div class="btn btn-danger removeRow">Delete</div>
+              </div>
+            </div>
+          </div>`,
+        footer: ''
+      }
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Edit Grid',
+      icon: 'fa fa-tasks',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#editgrid',
+      weight: 160,
+      schema: EditGridComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.type = 'datagrid';

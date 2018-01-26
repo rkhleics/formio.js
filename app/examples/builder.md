@@ -523,9 +523,21 @@ Formio.builder(document.getElementById("formio"), {
       hideLabel: false
     }
   ]
-}).then(function(form) {
-  form.on('submit', function(submission) {
-    console.log(submission);
+}).then(function(builder) {
+  builder.on('saveComponent', function(event) {
+    console.log('saveComponent', event);
+  });
+
+  builder.on('editComponent', function(event) {
+    console.log('editComponent', event);
+  });
+  
+  builder.on('updateComponent', function(event) {
+    console.log('updateComponent', event);
+  });
+  
+  builder.on('deleteComponent', function(event) {
+    console.log('deleteComponent', event);
   });
 });
 </script>

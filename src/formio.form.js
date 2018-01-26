@@ -666,7 +666,10 @@ export class FormioForm extends FormioComponents {
   }
 
   get schema() {
-    return this._form;
+    let schema = this._form;
+    schema.components = [];
+    this.eachComponent((component) => schema.components.push(component.schema));
+    return schema;
   }
 
   mergeData(_this, _that) {

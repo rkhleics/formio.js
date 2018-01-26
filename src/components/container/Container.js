@@ -1,7 +1,29 @@
 import { FormioComponents } from '../Components';
 import _isObject from 'lodash/isObject';
 import _each from 'lodash/each';
+
 export class ContainerComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      type: 'container',
+      key: 'container',
+      clearOnHide: true,
+      input: true,
+      components: []
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Container',
+      icon: 'fa fa-folder-open',
+      group: 'advanced',
+      documentation: 'http://help.form.io/userguide/#container',
+      weight: 140,
+      schema: ContainerComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.type = 'container';

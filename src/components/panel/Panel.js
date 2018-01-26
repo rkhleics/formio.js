@@ -1,5 +1,32 @@
 import { FormioComponents } from '../Components';
+
 export class PanelComponent extends FormioComponents {
+  static schema(...extend) {
+    return FormioComponents.schema({
+      label: 'Panel',
+      type: 'panel',
+      key: 'panel',
+      title: '',
+      theme: 'default',
+      breadcrumb: 'default',
+      components: [],
+      clearOnHide: false,
+      input: false,
+      tableView: false
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Panel',
+      icon: 'fa fa-list-alt',
+      group: 'layout',
+      documentation: 'http://help.form.io/userguide/#panels',
+      weight: 30,
+      schema: PanelComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.collapsed = !!this.component.collapsed;

@@ -1,5 +1,30 @@
 import { BaseComponent } from '../base/Base';
-export class GmapComponent extends BaseComponent {
+
+export class LocationComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'location',
+      label: 'Location',
+      key: 'location',
+      map: {
+        key: '',
+        region: '',
+        gmapId: '',
+        autocompleteOptions: {}
+      }
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Location',
+      group: 'advanced',
+      icon: 'fa fa-map',
+      weight: 500,
+      schema: LocationComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
 

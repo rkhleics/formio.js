@@ -5,6 +5,29 @@ import _delay from 'lodash/delay';
 import _get from 'lodash/get';
 
 export class AddressComponent extends TextFieldComponent {
+  static schema(...extend) {
+    return TextFieldComponent.schema({
+      type: 'address',
+      label: 'Address',
+      key: 'address',
+      map: {
+        region: '',
+        key: ''
+      }
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Address Field',
+      group: 'advanced',
+      icon: 'fa fa-home',
+      documentation: 'http://help.form.io/userguide/#address',
+      weight: 30,
+      schema: AddressComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     let src = 'https://maps.googleapis.com/maps/api/js?v=3&libraries=places&callback=googleMapsCallback';
@@ -450,15 +473,6 @@ export class AddressComponent extends TextFieldComponent {
     let info = super.elementInfo();
     info.attr.class += ' address-search';
     return info;
-  }
-
-  static get builderInfo() {
-    return {
-      title: 'Address',
-      icon: 'fa fa-home',
-      group: 'advanced',
-      documentation: 'http://help.form.io/userguide/#address'
-    };
   }
 
   get view() {

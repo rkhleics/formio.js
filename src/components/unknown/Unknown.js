@@ -1,4 +1,5 @@
 import { BaseComponent } from '../base/Base';
+
 export class UnknownComponent extends BaseComponent {
   build() {
     this.createElement();

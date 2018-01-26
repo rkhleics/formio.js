@@ -1,8 +1,8 @@
 export const component = {
   "input": true,
   "tableView": true,
-  "label": "gmap",
-  "key": "gmap",
+  "label": "Location",
+  "key": "location",
   "placeholder": "",
   "multiple": false,
   "protected": false,
@@ -24,7 +24,7 @@ export const component = {
   "validate": {
     "required": false
   },
-  "type": "gmap",
+  "type": "location",
   "tags": [
 
   ],

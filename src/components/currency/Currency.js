@@ -4,6 +4,25 @@ import _get from 'lodash/get';
 import { NumberComponent } from '../number/Number';
 
 export class CurrencyComponent extends NumberComponent {
+  static schema(...extend) {
+    return NumberComponent.schema({
+      type: 'currency',
+      label: 'Currency',
+      key: 'currency'
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Currency',
+      group: 'advanced',
+      icon: 'fa fa-usd',
+      documentation: 'http://help.form.io/userguide/#currency',
+      weight: 70,
+      schema: CurrencyComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
 
@@ -58,15 +77,5 @@ export class CurrencyComponent extends NumberComponent {
         allowDecimal: _get(this.component, 'allowDecimal', true)
       })
     });
-  }
-
-  static get builderInfo() {
-    return {
-      title: 'Currency',
-      icon: 'fa fa-usd',
-      group: 'advanced',
-      documentation: 'http://help.form.io/userguide/#currency',
-      weight: 60
-    };
   }
 }

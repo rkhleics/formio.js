@@ -1,6 +1,5 @@
 import maskInput, { conformToMask } from 'vanilla-text-mask';
 import Promise from "native-promise-only";
-import _ from 'lodash';
 import _get from 'lodash/get';
 import _each from 'lodash/each';
 import _merge from 'lodash/merge';
@@ -41,6 +40,11 @@ export class BaseComponent {
        * The input prefix
        */
       prefix: '',
+
+      /**
+       * The custom CSS class to provide to this component.
+       */
+      customClass: '',
 
       /**
        * The input suffix.
@@ -324,6 +328,13 @@ export class BaseComponent {
   }
 
   /**
+   * Returns the JSON schema for this component.
+   */
+  get schema() {
+    return this.component;
+  }
+
+  /**
    * Translate a text using the i18n system.
    *
    * @param {string} text - The i18n identifier.
@@ -585,7 +596,10 @@ export class BaseComponent {
     dialog.body = modalBody;
     dialog.close = function() {
       dialog.dispatchEvent(new CustomEvent('close'));
-      document.body.removeChild(dialog);
+      try {
+        document.body.removeChild(dialog);
+      }
+      catch (err) {}
     };
     return dialog;
   }

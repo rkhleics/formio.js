@@ -1,6 +1,30 @@
 import { BaseComponent } from '../base/Base';
 import _assign from 'lodash/assign';
+
 export class CheckBoxComponent extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      type: 'checkbox',
+      inputType: 'checkbox',
+      label: 'Checkbox',
+      key: 'checkbox',
+      datagridLabel: true,
+      value: '',
+      name: ''
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Checkbox',
+      group: 'basic',
+      icon: 'fa fa-check-square',
+      documentation: 'http://help.form.io/userguide/#checkbox',
+      weight: 50,
+      schema: CheckBoxComponent.schema()
+    };
+  }
+
   elementInfo() {
     const info = super.elementInfo();
     info.type = 'input';

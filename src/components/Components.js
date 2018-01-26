@@ -3,11 +3,18 @@ import _each from 'lodash/each';
 import _clone from 'lodash/clone';
 import _remove from 'lodash/remove';
 import _assign from 'lodash/assign';
+import _findIndex from 'lodash/findIndex';
 import Promise from "native-promise-only";
 import FormioUtils from '../utils/index';
 import { BaseComponent } from './base/Base';
 
 export class FormioComponents extends BaseComponent {
+  static schema(...extend) {
+    return BaseComponent.schema({
+      tree: true
+    }, ...extend);
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.type = 'components';
@@ -18,6 +25,13 @@ export class FormioComponents extends BaseComponent {
   build() {
     this.createElement();
     this.addComponents();
+  }
+
+  get schema() {
+    let schema = this.component;
+    schema.components = [];
+    this.eachComponent((component) => schema.components.push(component.schema));
+    return schema;
   }
 
   getComponents() {
@@ -107,7 +121,7 @@ export class FormioComponents extends BaseComponent {
    * @param component
    * @param data
    */
-  createComponent(component, options, data) {
+  createComponent(component, options, data, before) {
     if (!this.options.components) {
       this.options.components = require('./index');
       _assign(this.options.components, FormioComponents.customComponents);
@@ -117,7 +131,22 @@ export class FormioComponents extends BaseComponent {
     comp.root = this.root || this;
     comp.build();
     comp.isBuilt = true;
-    this.components.push(comp);
+    if (component.internal) {
+      return comp;
+    }
+
+    if (before) {
+      let index = _findIndex(this.components, {id: before.id});
+      if (index !== -1) {
+        this.components.splice(index, 0, comp);
+      }
+      else {
+        this.components.push(comp);
+      }
+    }
+    else {
+      this.components.push(comp);
+    }
     return comp;
   }
 
@@ -138,7 +167,7 @@ export class FormioComponents extends BaseComponent {
     element = element || this.getContainer();
     data = data || this.data;
     component.row = this.row;
-    let comp = this.createComponent(component, this.options, data);
+    let comp = this.createComponent(component, this.options, data, before ? before.component : null);
     this.setHidden(comp);
     element = this.hook('addComponent', element, comp);
     if (before) {
@@ -217,7 +246,8 @@ export class FormioComponents extends BaseComponent {
   addComponents(element, data) {
     element = element || this.getContainer();
     data = data || this.data;
-    _each(this.component.components, (component) => this.addComponent(component, element, data));
+    let components = this.hook('addComponents', this.component.components);
+    _each(components, (component) => this.addComponent(component, element, data));
   }
 
   updateValue(flags) {
@@ -444,5 +474,9 @@ FormioComponents.groupInfo = {
   advanced: {
     title: 'Advanced',
     weight: 10
+  },
+  layout: {
+    title: 'Layout',
+    weight: 20
   }
 };

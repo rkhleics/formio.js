@@ -1,8 +1,30 @@
 import { RadioComponent } from '../radio/Radio';
 import _each from 'lodash/each';
 import _isArray from 'lodash/isArray';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+
 export class SelectBoxesComponent extends RadioComponent {
+  static schema(...extend) {
+    return RadioComponent.schema({
+      type: 'selectboxes',
+      label: 'Select Boxes',
+      key: 'selectBoxes',
+      inline: false
+    }, ...extend);
+  }
+
+  static get builderInfo() {
+    return {
+      title: 'Select Boxes',
+      group: 'basic',
+      icon: 'fa fa-plus-square',
+      weight: 60,
+      documentation: 'http://help.form.io/userguide/#selectboxes',
+      schema: SelectBoxesComponent.schema()
+    };
+  }
+
   constructor(component, options, data) {
     super(component, options, data);
     this.component.inputType = 'checkbox';
@@ -73,10 +95,6 @@ export class SelectBoxesComponent extends RadioComponent {
 
   get view() {
     const value = this.getValue();
-
-    return _(this.component.values || [])
-      .filter((v) => value[v.value])
-      .map('label')
-      .join(', ');
+    return _map(_filter((this.component.values || []), (v) => value[v.value]), 'label').join(', ');
   }
 }
