@@ -36,8 +36,10 @@ export class TableComponent extends FormioComponents {
 
   build() {
     this.element = this.ce('div', {
+      id: this.id,
       class: 'table-responsive'
     });
+    this.element.component = this;
 
     let tableClass = 'table ';
     _each(['striped', 'bordered', 'hover', 'condensed'], (prop) => {

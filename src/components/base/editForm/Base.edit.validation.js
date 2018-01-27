@@ -17,38 +17,78 @@ export let BaseEditValidation = [
   },
   {
     weight: 200,
-    key: 'validate.minLength',
-    label: 'Minimum Length',
-    placeholder: 'Minimum Length',
-    type: 'number',
-    tooltip: 'The minimum length requirement this field must meet.',
-    input: true
-  },
-  {
-    weight: 300,
-    key: 'validate.maxLength',
-    label: 'Maximum Length',
-    placeholder: 'Maximum Length',
-    type: 'number',
-    tooltip: 'The maximum length requirement this field must meet.',
-    input: true
-  },
-  {
-    weight: 400,
-    key: 'validate.pattern',
-    label: 'Regular Expression Pattern',
-    placeholder: 'Regular Expression Pattern',
-    type: 'textfield',
-    tooltip: 'The regular expression pattern test that the field value must pass before the form can be submitted.',
-    input: true
-  },
-  {
-    weight: 500,
     key: 'validate.customMessage',
     label: 'Custom Error Message',
     placeholder: 'Custom Error Message',
     type: 'textfield',
     tooltip: 'Error message displayed if any error occurred.',
     input: true
+  },
+  {
+    type: 'panel',
+    title: 'Custom Validation',
+    collapsible: true,
+    collapsed: true,
+    style: {'margin-bottom': '10px'},
+    key: 'custom-validation-js',
+    weight: 300,
+    components: [
+      {
+        type: 'textarea',
+        key: 'validate.custom',
+        rows: 5,
+        editor: 'ace',
+        input: true
+      },
+      {
+        type: 'htmlelement',
+        tag: 'div',
+        content: `
+          <small>
+            <p>Enter custom validation code.</p>
+            <p>You must assign the <strong>valid</strong> variable as either <strong>true</strong> or an error message if validation fails.</p>
+            <p>The global variables <strong>input</strong>, <strong>component</strong>, and <strong>valid</strong> are provided.</p>
+          </small>`
+      },
+      {
+        type: 'well',
+        components: [
+          {
+            weight: 100,
+            type: 'checkbox',
+            label: 'Secret Validation',
+            tooltip: 'Check this if you wish to perform the validation ONLY on the server side. This keeps your validation logic private and secret.',
+            description: 'Check this if you wish to perform the validation ONLY on the server side. This keeps your validation logic private and secret.',
+            key: 'validate.customPrivate',
+            input: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    type: 'panel',
+    title: 'JSONLogic Validation',
+    collapsible: true,
+    collapsed: true,
+    key: 'json-validation-json',
+    weight: 400,
+    components: [
+      {
+        type: 'htmlelement',
+        tag: 'div',
+        content: '<p>Execute custom logic using <a href="http://jsonlogic.com/" target="_blank">JSONLogic</a>.</p>' +
+        '<p>Submission data is available as JsonLogic variables, with the same api key as your components.</p>' +
+        '<p><a href="http://formio.github.io/formio.js/app/examples/calculated.html" target="_blank">Click here for an example</a></p>'
+      },
+      {
+        type: 'textarea',
+        key: 'validate.json',
+        rows: 5,
+        editor: 'ace',
+        as: 'json',
+        input: true
+      }
+    ]
   }
 ];

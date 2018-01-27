@@ -140,7 +140,7 @@ export class BaseComponent {
      * can also be provided from the component.id value passed into the constructor.
      * @type {string}
      */
-    this.id = (component && component.id) ? component.id : Math.random().toString(36).substring(7);
+    this.id = (component && component.id) ? component.id : `e${Math.random().toString(36).substring(7)}`;
 
     /**
      * The options for this component.
@@ -1402,6 +1402,16 @@ export class BaseComponent {
         }
       }
     });
+  }
+
+  /**
+   * Determines if an element has a class.
+   *
+   * Taken from jQuery https://j11y.io/jquery/#v=1.5.0&fn=jQuery.fn.hasClass
+   */
+  hasClass(element, className) {
+    className = " " + className + " ";
+    return ((" " + element.className + " ").replace(/[\n\t\r]/g, " ").indexOf(className) > -1);
   }
 
   /**

@@ -62,8 +62,10 @@ export class PanelComponent extends FormioComponents {
     panelClass += `panel panel-${this.component.theme} `;
     panelClass += this.component.customClass;
     this.element = this.ce('div', {
+      id: this.id,
       class: panelClass
     });
+    this.element.component = this;
     if (this.component.title) {
       let heading = this.ce('div', {
         class: 'card-header panel-heading'

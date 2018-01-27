@@ -68,6 +68,7 @@ export class CheckBoxComponent extends BaseComponent {
       id: this.id,
       class: className
     });
+    this.element.component = this;
   }
 
   labelOnTheTopOrLeft() {

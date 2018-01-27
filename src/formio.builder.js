@@ -8,7 +8,7 @@ class FormioBuilder {
   constructor(element, form, options) {
     this.instance = null;
     this.element = element;
-    this.form = form;
+    this.form = form || {components: []};
     this.options = options;
   }
 

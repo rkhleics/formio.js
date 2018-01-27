@@ -36,11 +36,6 @@ module.exports = function(...extend) {
             components: BaseEditAPI
           },
           {
-            label: 'Layout',
-            key: 'layout',
-            components: BaseEditLayout
-          },
-          {
             label: 'Conditional',
             key: 'conditional',
             components: BaseEditConditional

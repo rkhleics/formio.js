@@ -29,8 +29,10 @@ export class HTMLComponent extends BaseComponent {
 
   build() {
     this.element = this.ce(this.component.tag, {
+      id: this.id,
       class: this.component.className
     });
+    this.element.component = this;
     _each(this.component.attrs, (attr) => {
       if (attr.attr) {
         this.element.setAttribute(attr.attr, attr.value);

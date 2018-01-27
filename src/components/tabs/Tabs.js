@@ -59,13 +59,18 @@ export class TabsComponent extends FormioComponents {
       this.tabContent.appendChild(tabPanel);
     });
     this.element = this.ce('div', {
+      id: this.id,
       class: this.className
     }, [this.tabBar, this.tabContent]);
+    this.element.component = this;
     this.setTab(0);
     return this.element;
   }
 
   setTab(index) {
+    if (this.tabLinks.length <= index) {
+      return;
+    }
     _each(this.tabLinks, (tabLink) => {
       this.removeClass(tabLink, 'active');
     });

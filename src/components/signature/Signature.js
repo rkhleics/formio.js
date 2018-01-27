@@ -110,6 +110,7 @@ export class SignatureComponent extends BaseComponent {
     }
 
     this.element = this.createElement();
+    this.element.component = this;
     let classNames = this.element.getAttribute('class');
     classNames += ' signature-pad';
     this.element.setAttribute('class', classNames);

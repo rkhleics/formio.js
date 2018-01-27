@@ -1,1 +1,6 @@
-export let BaseEditLayout = [];
+export let BaseEditLayout = [
+  {
+    type: 'textfield',
+
+  }
+];

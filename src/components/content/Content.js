@@ -23,8 +23,10 @@ export class ContentComponent extends BaseComponent {
 
   build() {
     this.element = this.ce('div', {
+      id: this.id,
       class: 'form-group ' + this.component.customClass
     });
+    this.element.component = this;
     this.element.innerHTML = this.interpolate(this.component.html, {data: this.data});
   }
 }

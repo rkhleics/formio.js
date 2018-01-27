@@ -186,6 +186,7 @@ export class FormioComponents extends BaseComponent {
    * @param {Array<BaseComponent>} components - An array of components to remove this component from.
    */
   removeComponent(component, components) {
+    components = components || this.components;
     component.destroy();
     const element = component.getElement();
     if (element && element.parentNode) {

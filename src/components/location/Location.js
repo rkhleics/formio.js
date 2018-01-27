@@ -41,8 +41,10 @@ export class LocationComponent extends BaseComponent {
 
   build() {
     this.element = this.ce('div', {
+      id: this.id,
       class: 'map-container'
     });
+    this.element.component = this;
     this.initGoogleMap();
     this.input = this.createInput(this.element);
     this.addInput(this.input, this.element);

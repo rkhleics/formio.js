@@ -27,10 +27,10 @@ export class FormioFormBuilder extends FormioForm {
             internal: true,
             tag: 'div',
             className: 'alert alert-info',
-            attrs: {
-              style: 'text-align:center; margin-bottom: 5px;',
-              role: 'alert'
-            },
+            attrs: [
+              {attr: 'style', value: 'text-align:center; margin-bottom: 0px;'},
+              {attr: 'role', value: 'alert'}
+            ],
             content: 'Drag and Drop a form component'
           }
         ];
@@ -67,6 +67,9 @@ export class FormioFormBuilder extends FormioForm {
       }
 
       if (!this.dragContainer || !this.dragContainer.innerHTML) {
+        if (this.dragContainer && this.dragContainer.parentNode) {
+          this.dragContainer.parentNode.removeChild(this.dragContainer);
+        }
         this.dragContainer = this.ce('div', {
           class: 'drag-container'
         });
@@ -297,7 +300,7 @@ export class FormioFormBuilder extends FormioForm {
       class: 'panel-group'
     });
 
-    this.groupPanels = [];
+    this.groupPanels = {};
 
     // Iterate through each group of components.
     let firstGroup = true;
@@ -309,9 +312,11 @@ export class FormioFormBuilder extends FormioForm {
         }, this.text(groupInfo.title));
         this.addEventListener(groupAnchor, 'click', (event) => {
           event.preventDefault();
-          _each(this.groupPanels, (groupPanel) => {
+          let clickedGroup = event.target.getAttribute('href').substr(1);
+          let wasIn = this.hasClass(this.groupPanels[clickedGroup], 'in');
+          _each(this.groupPanels, (groupPanel, groupId) => {
             this.removeClass(groupPanel, 'in');
-            if (groupPanel.getAttribute('id') === event.target.getAttribute('href').substr(1)) {
+            if ((groupId === clickedGroup) && !wasIn) {
               this.addClass(groupPanel, 'in');
             }
           });
@@ -340,12 +345,13 @@ export class FormioFormBuilder extends FormioForm {
           groupBodyClass += ' in';
           firstGroup = false;
         }
+        let groupId = `group-${group}`;
         let groupBodyWrapper = this.ce('div', {
           class: groupBodyClass,
-          id: 'group-' + group
+          id: groupId
         }, groupBody);
 
-        this.groupPanels.push(groupBodyWrapper);
+        this.groupPanels[groupId] = groupBodyWrapper;
 
         _each(groupComponents, (builderInfo) => {
           let compButton = this.ce('span', {
@@ -369,6 +375,12 @@ export class FormioFormBuilder extends FormioForm {
     });
 
     return sideBarElement;
+  }
+
+  getParentComponent(element) {
+    let containerComponent = element;
+    do { containerComponent = containerComponent.parentNode } while (containerComponent && !containerComponent.component);
+    return containerComponent.component;
   }
 
   build() {
@@ -401,24 +413,38 @@ export class FormioFormBuilder extends FormioForm {
       }
     }).on('drop', (element, target, source, sibling) => {
       let builderElement = source.querySelector('#' + element.id);
+      let newParent = this.getParentComponent(element);
+      if (!newParent) {
+        return console.warn('Could not find parent component.');
+      }
+
+      // If this is a new component, it will come from the builderElement
       if (
         builderElement &&
         builderElement.builderInfo &&
         builderElement.builderInfo.schema
       ) {
+        // Add the new component.
+        let component = newParent.addComponent(builderElement.builderInfo.schema, null, newParent.data, sibling);
 
-        // Walk up the parent chain until we find the container component.
-        let containerComponent = element;
-        do { containerComponent = containerComponent.parentNode } while (containerComponent && !containerComponent.component);
-        if (containerComponent && containerComponent.component) {
-          let component = containerComponent.component.addComponent(builderElement.builderInfo.schema, null, containerComponent.component.data, sibling);
-
-          // Edit the component.
-          this.editComponent(component, true);
-        }
+        // Edit the component.
+        this.editComponent(component, true);
 
         // Remove the element.
         target.removeChild(element);
+      }
+      // Check to see if this is a moved component.
+      else if (element.component) {
+        // Remove the component from its parent.
+        if (element.component.parent) {
+          element.component.parent.removeComponent(element.component);
+        }
+
+        // Add the component to its new parent.
+        newParent.addComponent(element.component.schema, null, newParent.data, sibling);
+
+        // Refresh the form.
+        this.form = this.schema;
       }
     });
   }
