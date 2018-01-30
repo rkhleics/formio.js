@@ -5,14 +5,18 @@ export let BaseEditAPI = [
     input: true,
     key: 'key',
     label: 'Property Name',
-    tooltip: 'The name of this field in the API endpoint.'
+    tooltip: 'The name of this field in the API endpoint.',
+    validate: {
+      pattern: '[A-Za-z0-9\-\.]+',
+      patternMessage: 'The property name must only contain alpha numeric characters.'
+    }
   },
   {
     weight: 100,
-    type: 'textfield',
+    type: 'tags',
     input: true,
-    multiple: true,
     label: 'Field Tags',
+    storeas: 'array',
     tooltip: 'Tag the field for use in custom logic.',
     key: 'tags'
   },

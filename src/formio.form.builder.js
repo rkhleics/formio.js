@@ -103,22 +103,22 @@ export class FormioFormBuilder extends FormioForm {
       this.componentPreview.appendChild(Components.create(component.component).getElement());
     }
 
-    // New components should set the key based on the label.
-    if (isNew) {
-      component.component.key = _camelCase(
-        component.component.label ||
-        component.component.placeholder ||
-        component.component.type
-      );
-    }
-
     // Ensure this component has a key.
-    if (!component.component.key) {
-      component.component.key = component.component.type;
+    if (isNew) {
+      if (!component.keyModified) {
+        component.component.key = _camelCase(
+          component.component.label ||
+          component.component.placeholder ||
+          component.component.type
+        );
+      }
+
+      // Set a unique key for this component.
+      FormioUtils.uniquify(this._form, component.component, isNew);
     }
 
-    // Set a unique key for this component.
-    FormioUtils.uniquify(this._form, component.component);
+    // Set the full form on the component.
+    component.component.__form = this.schema;
 
     // Modify the component information in the edit form.
     if (this.editForm) {
@@ -226,6 +226,11 @@ export class FormioFormBuilder extends FormioForm {
     // Register for when the edit form changes.
     this.editForm.on('change', (event) => {
       if (event.changed) {
+        // See if this is a manually modified key.
+        if (event.changed.component && (event.changed.component.key === 'key')) {
+          componentCopy.keyModified = true;
+        }
+
         // Set the component JSON to the new data.
         componentCopy.component = event.data;
 
@@ -248,6 +253,10 @@ export class FormioFormBuilder extends FormioForm {
     this.addEventListener(saveButton, 'click', (event) => {
       event.preventDefault();
       isNew = false;
+      if (componentCopy.component && componentCopy.component.__form) {
+        delete componentCopy.component.__form;
+      }
+      console.log(componentCopy.component);
       component.component = componentCopy.component;
       this.emit('saveComponent', component);
       this.form = this.schema;

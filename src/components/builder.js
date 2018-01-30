@@ -21,6 +21,7 @@ Components.signature.editForm = require('./signature/Signature.form');
 Components.select.editForm = require('./select/Select.form');
 Components.resource.editForm = require('./resource/Resource.form');
 Components.textarea.editForm = require('./textarea/TextArea.form');
+Components.tags.editForm = require('./tags/Tags.form');
 Components.button.editForm = require('./button/Button.form');
 Components.number.editForm = require('./number/Number.form');
 Components.password.editForm = require('./password/Password.form');

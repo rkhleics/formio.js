@@ -647,7 +647,7 @@ const FormioUtils = {
   },
 
   /**
-   * Memoize the given form components in a map, using the component keys.
+   * Find the given form components in a map, using the component keys.
    *
    * @param {Array} components
    *   An array of the form components.
@@ -663,12 +663,7 @@ const FormioUtils = {
     FormioUtils.eachComponent(components, function(component) {
       // If theres no key, we cant compare components.
       if (!component.key) return;
-
-      // A component is pre-existing if the key is unique, or the key is a duplicate and its not flagged as the new component.
-      if (
-        (component.key !== input.key) ||
-        ((component.key === input.key) && (!!component.isNew !== !!input.isNew))
-      ) {
+      if (component.key === input.key) {
         existingComponents[component.key] = component;
       }
     }, true);
@@ -706,7 +701,7 @@ const FormioUtils = {
   uniquify(form, component) {
     let changed = false;
     // Recurse into all child components.
-    FormioUtils.eachComponent([component], function(component) {
+    FormioUtils.eachComponent([component], (component) => {
       // Skip key uniquification if this component doesn't have a key.
       if (!component.key) {
         return;
@@ -714,7 +709,7 @@ const FormioUtils = {
 
       var memoization = FormioUtils.findExistingComponents(form.components, component);
       while (memoization.hasOwnProperty(component.key)) {
-        component.key = iterateKey(component.key);
+        component.key = this.iterateKey(component.key);
         changed = true;
       }
     }, true);

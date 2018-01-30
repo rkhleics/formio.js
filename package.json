@@ -56,8 +56,8 @@
   "dependencies": {
     "browser-cookies": "^1.2.0",
     "choices.js": "github:formio/Choices#ae69ff4",
-    "dragula": "^3.7.2",
     "dialog-polyfill": "^0.4.9",
+    "dragula": "^3.7.2",
     "eventemitter2": "^5.0.1",
     "flatpickr": "^4.2.3",
     "font-awesome": "^4.7.0",

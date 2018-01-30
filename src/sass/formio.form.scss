@@ -38,6 +38,10 @@
   display:none;
 }
 
+.formio-component-tags tags {
+  background-color: #fff;
+}
+
 .field-required:after {
   content:" *";
   color:red;

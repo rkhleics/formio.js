@@ -20,6 +20,7 @@ import { SignatureComponent } from './signature/Signature';
 import { SelectComponent } from './select/Select';
 import { ResourceComponent } from './resource/Resource';
 import { TextAreaComponent } from './textarea/TextArea';
+import { TagsComponent } from "./tags/Tags";
 import { ButtonComponent } from './button/Button';
 import { NumberComponent } from './number/Number';
 import { PasswordComponent } from './password/Password';
@@ -58,6 +59,7 @@ module.exports = {
   select: SelectComponent,
   resource: ResourceComponent,
   textarea: TextAreaComponent,
+  tags: TagsComponent,
   button: ButtonComponent,
   number: NumberComponent,
   password: PasswordComponent,

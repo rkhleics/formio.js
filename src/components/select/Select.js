@@ -11,6 +11,7 @@ import _isEqual from 'lodash/isEqual';
 import _isString from 'lodash/isString';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find  from 'lodash/find';
+import FormioUtils from '../../utils';
 
 export class SelectComponent extends BaseComponent {
   static schema(...extend) {
@@ -303,12 +304,14 @@ export class SelectComponent extends BaseComponent {
   }
 
   updateCustomItems() {
-    const data = _cloneDeep(this.data);
-    const row = _cloneDeep(this.row);
+    const utils = FormioUtils;
+    const data = _cloneDeep(this.root ? this.root.data : this.data);
+    const row = _cloneDeep(this.data);
     try {
       this.setItems(eval(`(function(data, row) { var values = [];${this.component.data.custom.toString()}; return values; })(data, row)`));
     }
     catch (error) {
+      console.warn(error);
       this.setItems([]);
     }
   }

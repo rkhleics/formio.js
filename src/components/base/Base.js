@@ -1633,6 +1633,7 @@ export class BaseComponent {
     this.hook('input', input, container);
     this.addInputEventListener(input);
     this.addInputSubmitListener(input);
+    return input;
   }
 
   /**
