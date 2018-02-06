@@ -2,6 +2,7 @@ import FormioForm from '../../formio.form';
 import FormioUtils from '../../utils';
 import Formio from '../../formio';
 import { FormioComponents } from "../Components";
+import _isEmpty from 'lodash/isEmpty';
 
 export class FormComponent extends FormioForm {
   static schema(...extend) {
@@ -246,6 +247,11 @@ export class FormComponent extends FormioForm {
       this.data[this.component.key] = this._submission = {data: {}};
       this.readyResolve();
       return;
+    }
+
+    // Load the subform if we have data.
+    if (submission._id || !_isEmpty(this.data[this.component.key])) {
+      this.loadSubForm();
     }
 
     // Set the url of this form to the url for a submission if it exists.

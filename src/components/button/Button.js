@@ -1,5 +1,6 @@
 import { BaseComponent } from '../base/Base';
 import FormioUtils from '../../utils';
+import _merge from 'lodash/merge';
 import _each from 'lodash/each';
 
 export class ButtonComponent extends BaseComponent {
@@ -72,12 +73,7 @@ export class ButtonComponent extends BaseComponent {
   }
 
   build() {
-    super.build();
-
-    // Add the shortcuts to the button element.
-    this.addShortcut(this.buttonElement);
-
-    if (this.viewOnlyMode()) {
+    if (this.viewOnly) {
       this.component.hidden = true;
     }
 
@@ -108,6 +104,23 @@ export class ButtonComponent extends BaseComponent {
       }, true);
     }
 
+    if (this.component.action === 'url') {
+      this.on('requestButton', () => {
+        this.loading = true;
+        this.disabled = true;
+      }, true);
+      this.on('requestDone', () => {
+        this.loading = false;
+        this.disabled = false;
+      }, true);
+      this.on('change', (value) => {
+        this.loading = false;
+        this.disabled = (this.component.disableOnInvalid && !this.root.isValid(value.data, true));
+      }, true);
+      this.on('error', () => {
+        this.loading = false;
+      }, true);
+    }
     this.addEventListener(this.buttonElement, 'click', (event) => {
       this.clicked = false;
       switch (this.component.action) {
@@ -138,16 +151,23 @@ export class ButtonComponent extends BaseComponent {
               components[key] = element;
             }
           });
-          // Make data available to script
-          var data = this.data;
+
           try {
-            eval(this.component.custom.toString());
+            (new Function('form', 'flattened', 'components', '_merge', 'data', this.component.custom.toString()))
+            (form, flattened, components, _merge, this.data);
           }
           catch (e) {
             /* eslint-disable no-console */
             console.warn('An error occurred evaluating custom logic for ' + this.key, e);
             /* eslint-enable no-console */
           }
+          break;
+        case 'url':
+          this.emit('requestButton');
+          this.emit('requestUrl', {
+            url: this.component.url,
+            headers: this.component.headers
+          });
           break;
         case 'reset':
           this.emit('resetForm');

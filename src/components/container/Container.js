@@ -38,6 +38,9 @@ export class ContainerComponent extends FormioComponents {
   }
 
   getValue() {
+    if (this.viewOnly) {
+      return this.value;
+    }
     let value = {};
     _each(this.components, (component) => {
       value[component.component.key] = component.getValue();
@@ -50,7 +53,6 @@ export class ContainerComponent extends FormioComponents {
     if (!value || !_isObject(value)) {
       return;
     }
-    this.value = value;
     _each(this.components, (component) => {
       if (component.type === 'components') {
         component.setValue(value, flags);

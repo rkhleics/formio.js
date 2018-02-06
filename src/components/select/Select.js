@@ -13,6 +13,42 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _find  from 'lodash/find';
 import FormioUtils from '../../utils';
 
+// Duck-punch the setValueByChoice to ensure we compare using _isEqual.
+Choices.prototype.setValueByChoice = function(value) {
+  if (!this.isTextElement) {
+    const choices = this.store.getChoices();
+    // If only one value has been passed, convert to array
+    const choiceValue = _isArray(value) ? value : [value];
+
+    // Loop through each value and
+    choiceValue.forEach((val) => {
+      const foundChoice = choices.find((choice) => {
+        // Check 'value' property exists and the choice isn't already selected
+        return _isEqual(choice.value, val);
+      });
+
+      if (foundChoice) {
+        if (!foundChoice.selected) {
+          this._addItem(
+            foundChoice.value,
+            foundChoice.label,
+            foundChoice.id,
+            foundChoice.groupId,
+            foundChoice.customProperties,
+            foundChoice.placeholder,
+            foundChoice.keyCode
+          );
+        } else if (!this.config.silent) {
+          console.warn('Attempting to select choice already selected');
+        }
+      } else if (!this.config.silent) {
+        console.warn('Attempting to select choice that does not exist');
+      }
+    });
+  }
+  return this;
+};
+
 export class SelectComponent extends BaseComponent {
   static schema(...extend) {
     return BaseComponent.schema({
@@ -262,7 +298,7 @@ export class SelectComponent extends BaseComponent {
 
     if (!_isEmpty(query)) {
       // Add the query string.
-      url += '?' + Formio.serialize(query);
+      url += (!(url.indexOf('?') !== -1) ? '?' : '&') + Formio.serialize(query);
     }
 
     // Make the request.
@@ -308,7 +344,7 @@ export class SelectComponent extends BaseComponent {
     const data = _cloneDeep(this.root ? this.root.data : this.data);
     const row = _cloneDeep(this.data);
     try {
-      this.setItems(eval(`(function(data, row) { var values = [];${this.component.data.custom.toString()}; return values; })(data, row)`));
+      this.setItems((new Function('data', 'row', `var values = []; ${this.component.data.custom.toString()}; return values;`))(data, row));
     }
     catch (error) {
       console.warn(error);
@@ -379,7 +415,7 @@ export class SelectComponent extends BaseComponent {
   }
 
   addPlaceholder(input) {
-    if (!this.component.placeholder) {
+    if (!this.component.placeholder || !input) {
       return;
     }
     let placeholder = document.createElement('option');
@@ -432,7 +468,6 @@ export class SelectComponent extends BaseComponent {
         containerOuter: 'choices form-group formio-choices',
         containerInner: 'form-control'
       },
-      itemComparer: _isEqual,
       placeholder: !!this.component.placeholder,
       placeholderValue: placeholderValue,
       searchPlaceholderValue: placeholderValue,
@@ -506,16 +541,17 @@ export class SelectComponent extends BaseComponent {
     if (!flags.changed && this.value) {
       return this.value;
     }
+    let value = '';
     if (this.choices) {
-      this.value = this.choices.getValue(true);
+      value = this.choices.getValue(true);
 
       // Make sure we don't get the placeholder
       if (
         !this.component.multiple &&
         this.component.placeholder &&
-        (this.value === this.t(this.component.placeholder))
+        (value === this.t(this.component.placeholder))
       ) {
-        this.value = '';
+        value = '';
       }
     }
     else {
@@ -525,16 +561,16 @@ export class SelectComponent extends BaseComponent {
           values.push(selectOption.value);
         }
       });
-      this.value = this.component.multiple ? values : values.shift();
+      value = this.component.multiple ? values : values.shift();
     }
-    return this.value;
+    return value;
   }
 
   setValue(value, flags) {
     flags = this.getFlags.apply(this, arguments);
     let hasPreviousValue = _isArray(this.value) ? this.value.length : this.value;
     let hasValue = _isArray(value) ? value.length : value;
-    this.value = value;
+    this.data[this.component.key] = value;
 
     // Do not set the value if we are loading... that will happen after it is done.
     if (this.loading) {
@@ -626,10 +662,6 @@ export class SelectComponent extends BaseComponent {
 
   setupValueElement(element) {
     element.innerHTML = this.asString();
-  }
-
-  updateViewOnlyValue() {
-    this.setupValueElement(this.valueElement);
   }
 
   destroy() {
